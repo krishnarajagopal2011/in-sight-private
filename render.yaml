@@ -1,26 +1,25 @@
 # Render Blueprint for in_sight. Render reads this when you create a "Blueprint"
-# from the repo. It runs the Flask app via waitress on a persistent disk, with an
-# in-process sync (INSIGHT_BG_SYNC) so no separate cron service is needed.
+# from the repo. Runs the Flask app via waitress with an in-process sync
+# (INSIGHT_BG_SYNC) so no separate cron service is needed.
 #
-# Secrets (passwords, API key) are marked `sync: false` — set them in the Render
-# dashboard, never in git. Your personal data (config.yaml + knowledge/*.yaml) is
-# gitignored, so deploy from a PRIVATE repo that includes it, OR add them as Render
-# "Secret Files" (see DEPLOY.md).
+# FREE tier: $0/mo, but (1) the service sleeps after ~15 min idle (~50s cold start
+# on next open) and (2) storage is ephemeral — the SQLite cache resets on restart,
+# so the display self-heals via sync but manually-logged /log health readings don't
+# persist. For always-warm + persisted readings, switch `plan: free` -> `starter`
+# and add back a disk (that's the ~$7.25/mo setup).
+#
+# Secrets (passwords, API key) are `sync: false` — set them in the dashboard.
 services:
   - type: web
     name: in-sight
     runtime: python
-    plan: starter            # "free" works too (spins down when idle, ~30s cold start)
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: waitress-serve --host=0.0.0.0 --port=$PORT server.app:app
     healthCheckPath: /api/health
-    disk:
-      name: insight-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: INSIGHT_DB
-        value: /var/data/insight.db          # SQLite cache lives on the persistent disk
+        value: /tmp/insight.db                # writable ephemeral path (no disk on free)
       - key: INSIGHT_BG_SYNC
         value: "1"                            # run sync in-process (no cron service)
       - key: INSIGHT_SYNC_SECONDS
