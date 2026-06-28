@@ -28,7 +28,12 @@ blocks:
   - {name: "Meditation + breathwork", start: "04:45", end: "05:00", kind: routine,
      options: ["Meditation", "Breathwork"]}
 
-  - {name: "Focus block", start: "05:00", end: "06:00", kind: focus,
+  # Daily customer outreach FIRST, in peak morning energy — drafts are pre-made
+  # overnight so it's "review + send", not "face the blank page" (beats RSD).
+  - {name: "Reach out — early customers", start: "05:00", end: "05:20", kind: focus,
+     options: ["Review + send today's drafts (3 early customers)"]}
+
+  - {name: "Focus block", start: "05:20", end: "06:00", kind: focus,
      options: ["Grant writing", "Concept detailing"]}
 
   # Afternoon = your biggest danger window AND your buffer/partner time. Fill it
@@ -44,6 +49,7 @@ blocks:
       - "Outdoor — walk in the light"
       - "Pickleball / movement"
       - "Cold splash + reset"
+      - "Massage — practice or a booked session"
       - "Roasted chana + fruit (skip fried / sweet)"
 
   # Protects the 8pm sleep boundary so the late-night danger window never opens.
