@@ -37,22 +37,18 @@ immediate_fallback:
   - {title: "Review 5 new application leads", priority: Normal,
      goal: "Fundraising & Applications"}
 
-# ── Google Calendar (appointments on the Life screen) ────────────────────────
-# Two accounts supported. Setup (one time):
-#   1. Google Cloud console → enable "Google Calendar API"; OAuth consent screen
-#      (External) → add both your Google accounts as test users.
-#   2. Create an OAuth client of type "Desktop app"; paste its id/secret below.
-#   3. Authorize each account (mints a refresh token into config/google_tokens.json):
-#        python scripts/gcal_auth.py "Personal"
-#        python scripts/gcal_auth.py "Work"
-# Leave enabled: false to turn the whole feature off.
+# ── Google Calendar (appointments + trips on the screen) ─────────────────────
+# iCal secret-link path — NO Google Cloud project / OAuth needed.
+#   For each calendar: Google Calendar (web) → Settings → click the calendar under
+#   "Settings for my calendars" → "Secret address in iCal format" → copy the URL.
+#   The URLs are secrets, so set them as env vars (locally in config/.env, and in
+#   Render's Environment): GCAL_ICAL_PERSONAL / GCAL_ICAL_WORK.
+# Timed events today → appointments; multi-day events → trips. enabled:false = off.
 google_calendar:
-  enabled: false
-  client_id: ""           # ...apps.googleusercontent.com
-  client_secret: ""
-  accounts:
-    - {label: "Personal", color: "#6bd0a0"}   # label must match the auth command
-    - {label: "Work",     color: "#6aa6ff"}
+  enabled: true
+  ical:
+    - {label: "Personal", color: "#6bd0a0", url_env: "GCAL_ICAL_PERSONAL"}
+    - {label: "Work",     color: "#6aa6ff", url_env: "GCAL_ICAL_WORK"}
 
 # ── Screen 2: life ───────────────────────────────────────────────────────────
 # The life domain (fitness / food / house / travel) lives in the editable

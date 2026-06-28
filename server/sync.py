@@ -66,6 +66,16 @@ def sync_life(cfg: dict) -> bool:
         payload["calendar"] = (prev or {}).get("payload", {}).get("calendar", []) if prev else []
         print(f"[sync] calendar: FAILED ({e}); kept {len(payload['calendar'])} cached events")
 
+    # Multi-day calendar events become trips, merged with knowledge/travel.yaml.
+    try:
+        cal_trips = gcal.ics_trips(cfg)
+        if cal_trips:
+            seen = {(t.get("destination"), t.get("start")) for t in payload["travel"]}
+            extra = [t for t in cal_trips if (t.get("destination"), t.get("start")) not in seen]
+            payload["travel"] = sorted(payload["travel"] + extra, key=lambda t: t.get("start", ""))[:5]
+    except Exception:  # noqa: BLE001 — trips are a bonus; never fail the sync
+        pass
+
     db.set_snapshot("life", payload)
     t = payload["food"]["totals"]
     print(

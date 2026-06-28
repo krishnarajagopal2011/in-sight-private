@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os
 from pathlib import Path
 from typing import Any, Optional
 
@@ -118,15 +119,116 @@ def _normalize(item: dict[str, Any], label: str, color: str) -> dict[str, Any]:
     return out
 
 
+# ── iCal (.ics secret-link) path — no Google Cloud project / OAuth needed ────────
+def _ics_accounts(gc: dict[str, Any]) -> list[dict[str, Any]]:
+    """Each entry: {label, color, url}. The URL may be inline (`url`) or pulled from
+    an env var (`url_env`) so the secret link can live in Render env vars, not git."""
+    out = []
+    for it in gc.get("ical", []) or []:
+        url = (it.get("url") or os.environ.get(it.get("url_env", ""), "")).strip()
+        if url:
+            out.append({
+                "label": it.get("label", "Calendar"),
+                "color": it.get("color", "#6aa6ff"),
+                "url": url,
+            })
+    return out
+
+
+def _normalize_ics(ev, label: str, color: str) -> dict[str, Any]:
+    start = ev.get("DTSTART").dt
+    end = ev.get("DTEND").dt if ev.get("DTEND") else None
+    all_day = not isinstance(start, dt.datetime)
+    out = {
+        "account": label, "label": label, "color": color,
+        "summary": str(ev.get("SUMMARY", "(no title)")),
+        "location": str(ev.get("LOCATION", "")),
+        "all_day": all_day, "start_hm": None, "end_hm": None,
+    }
+    if not all_day:
+        try:
+            out["start_hm"] = start.astimezone().strftime("%H:%M")
+            if isinstance(end, dt.datetime):
+                out["end_hm"] = end.astimezone().strftime("%H:%M")
+        except (ValueError, AttributeError):
+            pass
+    return out
+
+
+def _ics_today_events(text: str, label: str, color: str, today: dt.date) -> list[dict[str, Any]]:
+    import icalendar
+    import recurring_ical_events
+    cal = icalendar.Calendar.from_ical(text)
+    span = recurring_ical_events.of(cal).between(
+        dt.datetime.combine(today, dt.time.min), dt.datetime.combine(today, dt.time.max)
+    )
+    return [_normalize_ics(ev, label, color) for ev in span]
+
+
+def ics_trips(cfg: dict[str, Any], horizon_days: int = 90) -> list[dict[str, Any]]:
+    """Upcoming multi-day all-day events → trips (for the travel view). Best-effort."""
+    accounts = _ics_accounts(cfg.get("google_calendar", {}) or {})
+    if not accounts:
+        return []
+    import icalendar
+    import recurring_ical_events
+    today = dt.date.today()
+    horizon = today + dt.timedelta(days=horizon_days)
+    trips = []
+    for acc in accounts:
+        try:
+            cal = icalendar.Calendar.from_ical(_fetch_ics_text(acc["url"]))
+            for ev in recurring_ical_events.of(cal).between(today, horizon):
+                s = ev.get("DTSTART").dt
+                e = ev.get("DTEND").dt if ev.get("DTEND") else None
+                if isinstance(s, dt.datetime) or not e:
+                    continue                                  # timed event, not a trip
+                if (e - s).days >= 2:                         # all-day, spans 2+ days
+                    trips.append({
+                        "destination": str(ev.get("SUMMARY", "")),
+                        "start": s.isoformat(),
+                        "end": (e - dt.timedelta(days=1)).isoformat(),  # DTEND is exclusive
+                        "note": str(ev.get("LOCATION", "")),
+                        "source": "calendar",
+                    })
+        except Exception:                                     # noqa: BLE001 — best-effort
+            continue
+    return trips
+
+
+def _fetch_ics_text(url: str) -> str:
+    r = requests.get(url, timeout=TIMEOUT)
+    if r.status_code != 200:
+        raise GCalError(f"iCal fetch failed (HTTP {r.status_code})")
+    return r.text
+
+
+def _fetch_via_ics(accounts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    today = dt.date.today()
+    events, errors = [], []
+    for acc in accounts:
+        try:
+            events.extend(_ics_today_events(_fetch_ics_text(acc["url"]), acc["label"], acc["color"], today))
+        except (GCalError, requests.RequestException, ValueError) as e:
+            errors.append(f"{acc['label']}: {e}")
+    if accounts and len(errors) == len(accounts):
+        raise GCalError("; ".join(errors))
+    events.sort(key=lambda e: (not e["all_day"], e.get("start_hm") or "00:00"))
+    return events
+
+
 def fetch_events(cfg: dict[str, Any]) -> list[dict[str, Any]]:
     """Return today's events across all configured accounts (sorted).
 
-    [] if disabled/unconfigured. Raises GCalError if configured accounts all fail,
-    so sync.py can keep the last good calendar.
+    Uses the iCal secret-link path if configured, else OAuth. [] if disabled/
+    unconfigured. Raises GCalError if all accounts fail (sync keeps the last good).
     """
     gc = cfg.get("google_calendar", {}) or {}
     if not gc.get("enabled"):
         return []
+    ics_accounts = _ics_accounts(gc)
+    if ics_accounts:                                # iCal path takes precedence
+        return _fetch_via_ics(ics_accounts)
     client_id = gc.get("client_id", "")
     client_secret = gc.get("client_secret", "")
     tokens = load_tokens()

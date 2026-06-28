@@ -34,3 +34,7 @@ services:
         sync: false                           # ← set in dashboard
       - key: ANTHROPIC_API_KEY
         sync: false                           # ← set in dashboard (optional, for the wizard)
+      - key: GCAL_ICAL_PERSONAL
+        sync: false                           # ← secret iCal link for your personal calendar
+      - key: GCAL_ICAL_WORK
+        sync: false                           # ← secret iCal link for your work calendar
