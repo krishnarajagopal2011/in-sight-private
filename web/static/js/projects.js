@@ -36,92 +36,31 @@ function renderFocusState(f) {
 function render(data) {
   renderFocusState(data.focus);
 
-  // FOCUS — the single most-urgent priority. Flat kicker, no editorializing.
+  // ONLY "what to do now": the top 2 priorities as a pick-one-of-two. The rest of
+  // the backlog/milestones is deliberately NOT shown — it surfaces in the Life work
+  // block, two at a time by priority.
   const focus = document.getElementById("focus");
   clear(focus);
-  const top = (data.immediate || [])[0];
-  const kicker = "Do this next";
-  if (top) {
-    focus.appendChild(el("div", "focus-kicker", kicker));
-    focus.appendChild(el("div", "focus-title", top.title));
-    const meta = el("div", "focus-meta");
-    meta.append(top.goal || "");
-    if (top.milestone) meta.append(`  ›  ${top.milestone}`);
-    focus.appendChild(meta);
-    const pills = el("div"); pills.style.marginTop = ".7rem";
-    pills.appendChild(priorityPill(top.priority_label));
-    if (data.waiting?.count) pills.appendChild(el("span", "pill prog", `${data.waiting.count} waiting on you`));
-    focus.appendChild(pills);
+  const opts = (data.immediate || []).slice(0, 2);
+  if (opts.length) {
+    focus.appendChild(el("div", "focus-kicker", opts.length > 1 ? "Do one of these next" : "Do this next"));
+    const list = el("div", "do-options");
+    for (const t of opts) {
+      const row = el("div", "do-option");
+      row.appendChild(el("div", "focus-title", t.title));
+      const meta = el("div", "focus-meta");
+      meta.append(t.goal || "");
+      if (t.milestone) meta.append(`  ›  ${t.milestone}`);
+      row.appendChild(meta);
+      const pill = el("div"); pill.style.marginTop = ".5rem";
+      pill.appendChild(priorityPill(t.priority_label));
+      row.appendChild(pill);
+      list.appendChild(row);
+    }
+    focus.appendChild(list);
   } else {
     focus.appendChild(el("div", "focus-kicker", "All clear"));
     focus.appendChild(el("div", "focus-title", "No priorities right now 🎉"));
-  }
-
-  // TOP PRIORITIES — the rest of myTasks (the #1 is in focus above).
-  const rail = document.getElementById("immediate");
-  clear(rail);
-  const rest = (data.immediate || []).slice(1, 4);
-  if (rest.length) {
-    for (const t of rest) {
-      const row = el("div", "task-row");
-      row.appendChild(priorityPill(t.priority_label));
-      const txt = el("div");
-      txt.appendChild(el("div", "ttitle", t.title));
-      if (t.goal) txt.appendChild(el("div", "tgoal", t.goal));
-      row.appendChild(txt);
-      rail.appendChild(row);
-    }
-  } else {
-    rail.appendChild(el("div", "empty small", "Just the one above."));
-  }
-
-  // WAITING ON YOU — drafts/approvals pending sign-off.
-  const waiting = document.getElementById("waiting");
-  clear(waiting);
-  const w = data.waiting || {};
-  if ((w.items || []).length) {
-    for (const it of w.items) {
-      const row = el("div", "task-row");
-      row.appendChild(el("span", "pill prog", "Approve"));
-      const txt = el("div");
-      txt.appendChild(el("div", "ttitle", it.title));
-      if (it.goal) txt.appendChild(el("div", "tgoal", it.goal));
-      row.appendChild(txt);
-      waiting.appendChild(row);
-    }
-  } else if (w.count) {
-    waiting.appendChild(el("div", "waiting-count", `${w.count} item${w.count > 1 ? "s" : ""} awaiting your sign-off`));
-  } else {
-    waiting.appendChild(el("div", "empty small", "Nothing waiting ✓"));
-  }
-
-  // MILESTONES — team progress, one card per milestone.
-  const msLabel = document.getElementById("ms-label");
-  if (msLabel) msLabel.textContent = `${data.person ? data.person + "'s" : "Your"} milestones · team progress`;
-  const grid = document.getElementById("milestones");
-  clear(grid);
-  for (const m of data.milestones || []) {
-    const card = el("div", "project");
-    if (m.goal) card.appendChild(el("div", "pgoal", m.goal));
-    const head = el("div", "mhead");
-    head.appendChild(el("div", "pname", m.title || "—"));
-    if (m.total) head.appendChild(el("span", "pill prog", `${m.done}/${m.total}`));
-    card.appendChild(head);
-
-    const foot = el("div", "mfoot");
-    foot.appendChild(el("span", `pill ${(m.status || "").toLowerCase() === "in_progress" ? "prog" : "normal"}`,
-      STATUS_LABEL[m.status] || m.status || ""));
-    card.appendChild(foot);
-
-    const bar = el("div", "progress");
-    const span = el("span");
-    span.style.width = `${Math.max(2, m.pct || 0)}%`;
-    bar.appendChild(span);
-    card.appendChild(bar);
-    grid.appendChild(card);
-  }
-  if (!(data.milestones || []).length) {
-    grid.appendChild(el("div", "empty", "No milestones."));
   }
 }
 

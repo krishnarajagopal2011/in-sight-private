@@ -140,6 +140,11 @@ header.bar {
   line-height: 1.15; margin-top: .4rem; }
 .focus .focus-meta { color: var(--muted); margin-top: .6rem; font-size: 1rem; }
 
+/* "Do one of these next" — the top 2 priorities as a pick-one, divider between. */
+.do-options { display: flex; flex-direction: column; gap: 1.1rem; margin-top: .5rem; }
+.do-option { padding-top: 1.1rem; border-top: 1px solid var(--accent-dim); }
+.do-option:first-child { padding-top: 0; border-top: 0; }
+
 /* Everything except the active block recedes — barely there, almost the bg,
    so the one active card is the only thing that pulls the eye (ADHD focus). */
 .recede {

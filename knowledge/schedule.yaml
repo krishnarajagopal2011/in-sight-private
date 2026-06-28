@@ -36,6 +36,10 @@ blocks:
   - {name: "Focus block", start: "05:20", end: "06:00", kind: focus,
      options: ["Grant writing", "Concept detailing"]}
 
+  # Work block: dVerse tasks, surfaced 2 at a time by priority (pick one). Adjust
+  # the hours to your real work window.
+  - {name: "Work block", start: "09:00", end: "12:00", kind: focus, source: dverse}
+
   # Afternoon = your biggest danger window AND your buffer/partner time. Fill it
   # with connection + movement + light so the rabbit-hole has no room. Options are
   # built on the clean-dopamine levers: light, movement, cold, protein, connection.
