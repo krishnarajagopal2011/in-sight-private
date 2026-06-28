@@ -314,7 +314,14 @@ def todays_schedule(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
             "note": b.get("note", ""),
         })
     out.sort(key=lambda x: str(x.get("start", "99:99")))
-    return {"blocks": out, "buffer_min": int(sched.get("buffer_min", 15) or 15)}
+    # The full menu of today's options (every block's choices) — for the "pick
+    # anything" list, so a mood-switch still lands on something that's on the plan.
+    menu = []
+    for b in sched.get("blocks", []) or []:
+        for o in b.get("options", []) or []:
+            if o not in menu:
+                menu.append(str(o))
+    return {"blocks": out, "buffer_min": int(sched.get("buffer_min", 15) or 15), "menu": menu}
 
 
 # ── Travel ───────────────────────────────────────────────────────────────────

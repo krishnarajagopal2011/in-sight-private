@@ -138,7 +138,21 @@ def api_life():
         # Surface the top tasks here too, so the Life board has a Tasks card.
         proj = db.get_snapshot("projects")
         body["data"]["tasks"] = (proj["payload"].get("immediate") if proj else []) or []
+        # Today's tap-to-done state, so checked items stay checked across refreshes.
+        body["data"]["completions"] = db.get_completions(dt.date.today())
     return jsonify(body), status
+
+
+@app.post("/api/complete")
+def api_complete():
+    """Toggle a checklist item done/undone for a day (tap-to-complete on the kiosk)."""
+    body = request.get_json(silent=True) or {}
+    key = (body.get("key") or "").strip()
+    if not key:
+        return jsonify({"ok": False, "error": "missing key"}), 400
+    date = (body.get("date") or dt.date.today().isoformat())[:10]
+    db.set_completion(date, key, bool(body.get("done")))
+    return jsonify({"ok": True})
 
 
 # ── Health logging (phone form) ──────────────────────────────────────────────

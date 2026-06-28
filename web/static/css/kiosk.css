@@ -285,6 +285,25 @@ ul.clean.meal-items { margin-top: .9rem; gap: .75rem; }
 ul.clean.meal-items li { font-size: clamp(1.1rem, 1.6vw, 1.45rem); }
 ul.clean.meal-items li::before { width: 1.2rem; height: 1.2rem; }
 
+/* tap-to-complete — checked items fill green + strike through, and persist. */
+ul.clean.meal-items li { cursor: pointer; transition: opacity .2s ease; }
+ul.clean.meal-items li.done { color: var(--faint); text-decoration: line-through; }
+ul.clean.meal-items li.done::before { background: var(--good); border-color: var(--good); }
+
+/* Bottom-right "pick anything from today" list (desktop/kiosk only). */
+.daymenu {
+  position: fixed; right: clamp(12px, 1.4vw, 22px); bottom: clamp(12px, 1.4vw, 22px);
+  width: min(280px, 30vw); max-height: 42vh; overflow-y: auto;
+  background: rgba(24, 28, 36, .82); border: 1px solid var(--line);
+  border-radius: 14px; padding: .8rem 1rem; backdrop-filter: blur(8px); z-index: 30;
+}
+.daymenu-title { font-size: .68rem; text-transform: uppercase; letter-spacing: .12em;
+  color: var(--faint); margin-bottom: .5rem; }
+.daymenu-list { gap: .42rem; margin-top: 0; }
+.daymenu-list li { font-size: .85rem; font-weight: 500; color: var(--muted); }
+.daymenu-list li::before { display: none; }
+@media (max-width: 760px) { .daymenu { display: none !important; } }
+
 .meal-note {
   margin-top: 1rem; color: var(--accent); font-weight: 700; font-size: .95rem;
   border-top: 1px solid var(--accent-dim); padding-top: .7rem;

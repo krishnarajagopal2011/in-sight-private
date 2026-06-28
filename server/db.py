@@ -25,6 +25,13 @@ CREATE TABLE IF NOT EXISTS meta (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS completions (
+    date        TEXT NOT NULL,
+    item_key    TEXT NOT NULL,
+    done        INTEGER NOT NULL,
+    updated_at  REAL NOT NULL,
+    PRIMARY KEY (date, item_key)
+);
 CREATE TABLE IF NOT EXISTS health_readings (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     date        TEXT NOT NULL,          -- YYYY-MM-DD the reading is for
@@ -179,6 +186,28 @@ def get_meta(key: str, default: Optional[str] = None, db_path: Path = DB_PATH) -
     with _connect(db_path) as conn:
         row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
     return row["value"] if row else default
+
+
+# ── Completions (tap-to-done on the kiosk) ───────────────────────────────────
+def set_completion(date: str, key: str, done: bool, db_path: Path = DB_PATH) -> None:
+    init(db_path)
+    with _connect(db_path) as conn:
+        conn.execute(
+            "INSERT INTO completions (date, item_key, done, updated_at) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(date, item_key) DO UPDATE SET done=excluded.done, updated_at=excluded.updated_at",
+            (str(date)[:10], key, 1 if done else 0, time.time()),
+        )
+        conn.commit()
+
+
+def get_completions(date: str, db_path: Path = DB_PATH) -> list[str]:
+    """Item keys marked done for the given day."""
+    init(db_path)
+    with _connect(db_path) as conn:
+        rows = conn.execute(
+            "SELECT item_key FROM completions WHERE date = ? AND done = 1", (str(date)[:10],)
+        ).fetchall()
+    return [r["item_key"] for r in rows]
 
 
 # ── Health readings (logged from the phone form) ─────────────────────────────

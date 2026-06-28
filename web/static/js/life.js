@@ -39,6 +39,54 @@ function panel(kicker, builder, opts = {}) {
   return p;
 }
 
+// ── Completion (tap-to-done, persisted to the server) ────────────────────────
+let DONE = new Set();
+const todayISO = () => {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+};
+
+function toggleDone(li, key) {
+  const done = !li.classList.contains("done");
+  li.classList.toggle("done", done);
+  if (done) DONE.add(key); else DONE.delete(key);
+  fetch("/api/complete", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ date: todayISO(), key, done }),
+  }).catch(() => {});                 // offline-first: keep the visual toggle anyway
+}
+
+// A checklist whose items persist when tapped. `keyPrefix` namespaces the keys.
+function checklist(items, keyPrefix) {
+  const ul = el("ul", "clean meal-items");
+  for (const it of items || []) {
+    const li = el("li", null, it);
+    const key = `${keyPrefix}|${it}`;
+    if (DONE.has(key)) li.classList.add("done");
+    li.addEventListener("click", () => toggleDone(li, key));
+    ul.appendChild(li);
+  }
+  return ul;
+}
+
+// Bottom-right "pick anything" list — every option on today's plan, so a mood to
+// do something else still lands on something that was going to get done.
+function renderDayMenu(data) {
+  const host = document.getElementById("daymenu");
+  if (!host) return;
+  clear(host);
+  const items = [
+    ...((data.schedule && data.schedule.menu) || []),
+    ...((data.tasks || []).map((t) => t.title)),
+  ];
+  if (!items.length) { host.style.display = "none"; return; }
+  host.style.display = "";
+  host.appendChild(el("div", "daymenu-title", "Today · pick anything"));
+  const ul = el("ul", "clean daymenu-list");
+  for (const it of items) ul.appendChild(el("li", null, it));
+  host.appendChild(ul);
+}
+
 // ── Unified timed-event model (fitness, meals, calendar) ─────────────────────
 // Each event: {start (HH:MM), end?, live, allDay, sort, make(prefix) -> panel}
 function collectEvents(data) {
@@ -83,9 +131,7 @@ function collectEvents(data) {
       make: (prefix) => panel(prefix ?? (due ? `${verb} now` : `${verb} ${relTime(m.time)}`), (p) => {
         p.appendChild(el("div", "panel-title-lg", m.name));
         p.appendChild(el("div", "panel-time", m.time));
-        const ul = el("ul", "clean meal-items");
-        for (const it of m.items || []) ul.appendChild(el("li", null, it));
-        p.appendChild(ul);
+        p.appendChild(checklist(m.items, `meal|${m.name}`));
         if (m.note) p.appendChild(el("div", "meal-note", m.note));
       }, { focus: true, due }),
     });
@@ -99,9 +145,7 @@ function collectEvents(data) {
       make: (prefix) => panel(prefix ?? (due ? "Supplements · now" : `Supplements · ${relTime(s.time)}`), (p) => {
         p.appendChild(el("div", "panel-title", `💊 ${s.name}`));
         p.appendChild(el("div", "panel-time", s.time));
-        const ul = el("ul", "clean meal-items");
-        for (const it of s.items || []) ul.appendChild(el("li", null, it));
-        p.appendChild(ul);
+        p.appendChild(checklist(s.items, `supp|${s.name}`));
         p.appendChild(el("div", "meal-note", "30 min before · with water"));
       }, { due }),
     });
@@ -114,9 +158,7 @@ function collectEvents(data) {
       start: mp.time, end: null, live: false, allDay: false, sort: toMin(mp.time),
       make: (prefix) => panel(prefix ?? (due ? "Prep · now" : `Prep · ${relTime(mp.time)}`), (p) => {
         p.appendChild(el("div", "panel-title", `🔪 ${mp.title}`));
-        const ul = el("ul", "clean meal-items");
-        for (const it of mp.items || []) ul.appendChild(el("li", null, it));
-        p.appendChild(ul);
+        p.appendChild(checklist(mp.items, `prep|${mp.title}`));
       }, { due }),
     });
   }
@@ -154,9 +196,7 @@ function housePanel(data) {
   if (!active.length) return null;
   return panel("House · now", (p) => {
     for (const sec of active) {
-      const ul = el("ul", "clean meal-items");
-      for (const task of sec.tasks) ul.appendChild(el("li", null, task));
-      p.appendChild(ul);
+      p.appendChild(checklist(sec.tasks, `house|${sec.label}`));
     }
   });
 }
@@ -251,9 +291,7 @@ function blockPanel(data) {
     if (cur.source === "dverse") picks = (data.tasks || []).slice(0, 2).map((t) => t.title);
     const kicker = picks.length > 1 ? `${cur.name} · pick one` : cur.name;
     return panel(kicker, (p) => {
-      const ul = el("ul", "clean meal-items");
-      for (const opt of picks) ul.appendChild(el("li", null, opt));
-      p.appendChild(ul);
+      p.appendChild(checklist(picks, `block|${cur.name}`));
       if (cur.note) p.appendChild(el("div", "meal-note", cur.note));
       if (cur.boundary) p.appendChild(el("div", "meal-note", cur.boundary));
     }, { focus: true });
@@ -281,16 +319,16 @@ function groceriesPanel(data) {
   return panel("Groceries · shopping today", (p) => {
     for (const [cat, items] of Object.entries(cats)) {
       p.appendChild(el("div", "panel-sub", cat));
-      const ul = el("ul", "clean meal-items");
-      for (const it of items || []) ul.appendChild(el("li", null, it));
-      p.appendChild(ul);
+      p.appendChild(checklist(items, `grocery|${cat}`));
     }
   });
 }
 
 function render() {
   if (!latest) return;
+  DONE = new Set(latest.completions || []);   // checked items stay checked
   renderHealthStrip();
+  renderDayMenu(latest);
   const flow = document.getElementById("flow");
   clear(flow);
 
