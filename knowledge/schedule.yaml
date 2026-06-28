@@ -49,6 +49,7 @@ blocks:
   # Protects the 8pm sleep boundary so the late-night danger window never opens.
   - {name: "Wind down", start: "19:00", end: "20:00", kind: winddown,
      options: ["Read a book", "Music — lie down"],
+     note: "Turmeric + black pepper oat milk (no sugar) — helps you sleep",
      boundary: "Phone out of the bedroom · lights out by 20:00"}
 
 # Recurring community events (Auroville) — kept here instead of parsing the weekly

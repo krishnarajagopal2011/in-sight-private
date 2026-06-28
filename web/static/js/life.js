@@ -91,6 +91,22 @@ function collectEvents(data) {
     });
   }
 
+  // Supplement / med doses — timed 30 min before breakfast & dinner.
+  for (const s of data.food?.supplements || []) {
+    const due = minsUntil(s.time) <= 0;
+    ev.push({
+      start: s.time, end: null, live: false, allDay: false, sort: toMin(s.time),
+      make: (prefix) => panel(prefix ?? (due ? "Supplements · now" : `Supplements · ${relTime(s.time)}`), (p) => {
+        p.appendChild(el("div", "panel-title", `💊 ${s.name}`));
+        p.appendChild(el("div", "panel-time", s.time));
+        const ul = el("ul", "clean meal-items");
+        for (const it of s.items || []) ul.appendChild(el("li", null, it));
+        p.appendChild(ul);
+        p.appendChild(el("div", "meal-note", "30 min before · with water"));
+      }, { due }),
+    });
+  }
+
   for (const c of data.calendar || []) {
     if (c.all_day) {
       ev.push({
@@ -224,6 +240,7 @@ function blockPanel(data) {
       const ul = el("ul", "clean meal-items");
       for (const opt of picks) ul.appendChild(el("li", null, opt));
       p.appendChild(ul);
+      if (cur.note) p.appendChild(el("div", "meal-note", cur.note));
       if (cur.boundary) p.appendChild(el("div", "meal-note", cur.boundary));
     }, { focus: true });
   }

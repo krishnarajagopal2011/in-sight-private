@@ -3,9 +3,10 @@
 # auto-filled from the days that do have them, so one day is enough to start.
 targets: {protein_g: 120, carbs_g: 200, fat_g: 60, calories: 1800}
 soak_by: "19:00"
-daily_supplements:
-  - {name: "Vitamin B12", when: "morning"}
-  - {name: "Omega-3 (algae)", when: "with a meal"}
+# Supplements/meds taken `minutes_before` a named meal → shown as a timed reminder.
+supplements:
+  - {meal: "Breakfast", minutes_before: 30, items: ["Vitamin B12", "Vitamin D3"]}
+  - {meal: "Dinner",    minutes_before: 30, items: ["Magnesium", "Omega-3 (algae)"]}
 guidance:
   - "Prioritise non-starchy veg, legumes, tofu/tempeh"
   - "Eat veg/protein before the starch"

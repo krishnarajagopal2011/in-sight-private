@@ -17,12 +17,16 @@ guidance:
   - "Front-load carbs to morning/training; lightest dinner at 18:30 for a 13–14 h fast."
   - "Soaked fenugreek + cinnamon daily; sprout dals 1–2 days ahead."
 
-daily_supplements:
-  - {name: "Vitamin B12 (methyl) 1000 µg",            when: "morning — vegan-essential"}
-  - {name: "Vitamin D3 (vegan/lichen) 2000–4000 IU",  when: "morning, with fat"}
-  - {name: "Algae omega-3 (EPA+DHA) 500 mg",          when: "with a meal"}
-  - {name: "Creatine monohydrate 5 g",                when: "any time"}
-  - {name: "Magnesium glycinate 300 mg",              when: "before bed"}
+# Supplements + meds, taken `minutes_before` the named meal. The Life screen shows
+# a timed "take now" card, computed from that day's actual meal time (so it tracks
+# whatever time breakfast/dinner lands at). Skipped on days without that meal.
+supplements:
+  - meal: "Breakfast"
+    minutes_before: 30
+    items: ["Zomelis D 10", "Glycomet GP 0.5", "Vit B12", "Ashwagandha", "Q10", "Vilvam ×3", "Madhumegam ×2"]
+  - meal: "Dinner"
+    minutes_before: 30
+    items: ["Glycomet GP 0.5", "Magnesium", "Zinc Picolinate", "Vilvam ×1", "Madhumegam ×2"]
 
 soak_tonight_default: &soak "1 tsp methi (fenugreek) for tomorrow's morning water · keep moong sprouting (1–2 days ahead)"
 

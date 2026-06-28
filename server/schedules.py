@@ -26,6 +26,36 @@ def _weekday_key(d: dt.date) -> str:
     return WEEKDAYS[d.weekday()]
 
 
+def _minus_minutes(hhmm: str, minutes: int) -> str:
+    try:
+        h, m = (int(x) for x in str(hhmm).split(":")[:2])
+    except ValueError:
+        return hhmm
+    total = (h * 60 + m - minutes) % (24 * 60)
+    return f"{total // 60:02d}:{total % 60:02d}"
+
+
+def _supplements_today(food: dict[str, Any], meals: list) -> list[dict[str, Any]]:
+    """Timed supplement/med reminders, anchored `minutes_before` each named meal's
+    actual time today. A meal missing from today's plan (e.g. a fast day) is skipped."""
+    out = []
+    for s in food.get("supplements", []) or []:
+        target = str(s.get("meal", "")).lower()
+        mtime = next(
+            (m.get("time") for m in meals if target and target in str(m.get("name", "")).lower()),
+            None,
+        )
+        if not mtime:
+            continue
+        out.append({
+            "name": f"Before {s.get('meal', 'meal').lower()}",
+            "time": _minus_minutes(mtime, int(s.get("minutes_before", 30) or 30)),
+            "items": [str(i) for i in s.get("items", []) or []],
+        })
+    out.sort(key=lambda x: x["time"])
+    return out
+
+
 # ── Fitness ──────────────────────────────────────────────────────────────────
 def todays_fitness(cfg: dict[str, Any], d: dt.date) -> list[dict[str, Any]]:
     fitness = cfg.get("fitness", {}) or {}
@@ -94,6 +124,7 @@ def food_today(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
 
     meals = list(day.get("meals", []) or [])
     meals.sort(key=lambda m: str(m.get("time", "99:99")))
+    supplements = _supplements_today(food, meals)
 
     totals = {"protein_g": 0, "carbs_g": 0, "fat_g": 0, "fiber_g": 0, "calories": 0}
     for m in meals:
@@ -109,7 +140,7 @@ def food_today(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
         "soak_by": food.get("soak_by", "19:00"),
         "soak_tonight": day.get("soak_tonight", ""),
         "prep_anchor": food.get("prep_anchor", ""),
-        "supplements": food.get("daily_supplements", []) or [],
+        "supplements": supplements,
         "guidance": food.get("guidance", []) or [],
         "meals": meals,
     }
@@ -246,6 +277,7 @@ def todays_schedule(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
             "source": b.get("source", ""),
             "picks": picks[:2],
             "boundary": b.get("boundary", ""),
+            "note": b.get("note", ""),
         })
     out.sort(key=lambda x: str(x.get("start", "99:99")))
     return {"blocks": out, "buffer_min": int(sched.get("buffer_min", 15) or 15)}
