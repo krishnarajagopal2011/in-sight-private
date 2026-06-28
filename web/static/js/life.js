@@ -107,6 +107,20 @@ function collectEvents(data) {
     });
   }
 
+  // Meal prep — exactly what to prep, at the right time (decision-free).
+  for (const mp of data.food?.meal_prep || []) {
+    const due = minsUntil(mp.time) <= 0;
+    ev.push({
+      start: mp.time, end: null, live: false, allDay: false, sort: toMin(mp.time),
+      make: (prefix) => panel(prefix ?? (due ? "Prep · now" : `Prep · ${relTime(mp.time)}`), (p) => {
+        p.appendChild(el("div", "panel-title", `🔪 ${mp.title}`));
+        const ul = el("ul", "clean meal-items");
+        for (const it of mp.items || []) ul.appendChild(el("li", null, it));
+        p.appendChild(ul);
+      }, { due }),
+    });
+  }
+
   for (const c of data.calendar || []) {
     if (c.all_day) {
       ev.push({
@@ -259,6 +273,21 @@ function blockPanel(data) {
   return null;
 }
 
+// Groceries — the weekly shopping checklist, only on the configured shopping day.
+function groceriesPanel(data) {
+  const g = data.groceries;
+  const cats = (g && g.due && g.categories) || null;
+  if (!cats || !Object.keys(cats).length) return null;
+  return panel("Groceries · shopping today", (p) => {
+    for (const [cat, items] of Object.entries(cats)) {
+      p.appendChild(el("div", "panel-sub", cat));
+      const ul = el("ul", "clean meal-items");
+      for (const it of items || []) ul.appendChild(el("li", null, it));
+      p.appendChild(ul);
+    }
+  });
+}
+
 function render() {
   if (!latest) return;
   renderHealthStrip();
@@ -272,6 +301,7 @@ function render() {
   const windowed = timed.filter(inWindow).sort((a, b) => a.sort - b.sort);
   const house = housePanel(latest);
   const soak = soakPanel(latest);
+  const groceries = groceriesPanel(latest);
   // The current schedule block (with its 2 options) takes the Tasks slot; outside
   // any block it falls back to the dVerse top priority.
   const tasks = blockPanel(latest) || tasksPanel(latest);
@@ -283,6 +313,7 @@ function render() {
     ...windowed.map((e) => e.make()),
     ...(house ? [house] : []),
     ...(tasks ? [tasks] : []),
+    ...(groceries ? [groceries] : []),
     ...(soak ? [soak] : []),
   ];
 

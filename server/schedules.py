@@ -35,6 +35,39 @@ def _minus_minutes(hhmm: str, minutes: int) -> str:
     return f"{total // 60:02d}:{total % 60:02d}"
 
 
+def _meal_prep_today(food: dict[str, Any], d: dt.date, is_fast: bool) -> list[dict[str, Any]]:
+    """Timed prep tasks for today (skipped on a fast day). A `day` limits an entry to
+    one weekday; otherwise it runs daily."""
+    if is_fast:
+        return []
+    wk = _weekday_key(d)
+    out = []
+    for p in food.get("meal_prep", []) or []:
+        only = str(p.get("day", "")).lower()
+        if only and only != wk:
+            continue
+        out.append({
+            "time": p.get("time", ""),
+            "title": p.get("title", ""),
+            "items": [str(i) for i in p.get("items", []) or []],
+        })
+    out.sort(key=lambda x: str(x.get("time", "99:99")))
+    return out
+
+
+def groceries_today(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
+    """The weekly grocery checklist, flagged `due` on the configured shopping day."""
+    g = (cfg.get("food", {}) or {}).get("groceries") or {}
+    if not g:
+        return {}
+    return {
+        "due": str(g.get("day", "")).lower() == _weekday_key(d),
+        "day": g.get("day", ""),
+        "time": g.get("time", ""),
+        "categories": g.get("categories", {}) or {},
+    }
+
+
 def _supplements_today(food: dict[str, Any], meals: list) -> list[dict[str, Any]]:
     """Timed supplement/med reminders, anchored `minutes_before` each named meal's
     actual time today. A meal missing from today's plan (e.g. a fast day) is skipped."""
@@ -141,6 +174,7 @@ def food_today(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
         "soak_tonight": day.get("soak_tonight", ""),
         "prep_anchor": food.get("prep_anchor", ""),
         "supplements": supplements,
+        "meal_prep": _meal_prep_today(food, d, bool(day.get("fast"))),
         "guidance": food.get("guidance", []) or [],
         "meals": meals,
     }
@@ -319,6 +353,7 @@ def build_life_payload(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
         "house": todays_house(cfg, d),
         "travel": upcoming_travel(cfg, d),
         "schedule": todays_schedule(cfg, d),
+        "groceries": groceries_today(cfg, d),
     }
 
 

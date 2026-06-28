@@ -7,6 +7,18 @@ soak_by: "19:00"
 supplements:
   - {meal: "Breakfast", minutes_before: 30, items: ["Vitamin B12", "Vitamin D3"]}
   - {meal: "Dinner",    minutes_before: 30, items: ["Magnesium", "Omega-3 (algae)"]}
+# Weekly grocery checklist — shown on `day`. groups → items.
+groceries:
+  day: saturday
+  time: "10:00"
+  categories:
+    "Proteins": ["Tofu", "Lentils", "Protein powder"]
+    "Produce": ["Greens", "Seasonal veg", "Fruit"]
+    "Pantry": ["Oat milk", "Oats", "Nuts & seeds"]
+# Timed prep so there's no "what do I make?". `day` limits an entry to one weekday.
+meal_prep:
+  - {time: "20:00", title: "Set up tomorrow", items: ["Soak oats / lentils"]}
+  - {day: sunday, time: "17:00", title: "Weekly batch prep", items: ["Batch-cook grains + protein"]}
 guidance:
   - "Prioritise non-starchy veg, legumes, tofu/tempeh"
   - "Eat veg/protein before the starch"

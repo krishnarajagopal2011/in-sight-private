@@ -28,6 +28,28 @@ supplements:
     minutes_before: 30
     items: ["Glycomet GP 0.5", "Magnesium", "Zinc Picolinate", "Vilvam ×1", "Madhumegam ×2"]
 
+# ── Groceries & prep — so nothing runs out and there's no "what do I make?" ──────
+# Lunch & dinner mains come from the Auroville solar kitchen; this covers the HOME
+# staples (breakfast, snacks, soaks, shakes) + supplements. ⚠️ Edit to your reality —
+# changes here flow straight to the screen.
+groceries:
+  day: saturday          # shopping day — the list shows as a checklist that day
+  time: "10:00"
+  categories:
+    "Proteins & dals": ["Tofu", "Tempeh", "Moong (to sprout)", "Chana / chickpeas", "Rajma", "Toor + masoor dal", "MyPro protein powder", "Edamame", "Peanuts"]
+    "Produce": ["Spinach / greens", "Seasonal veg", "Lemons", "Apples / pears", "Tomatoes", "Cucumber", "Curry leaves"]
+    "Nuts & seeds": ["Almonds", "Walnuts", "Pumpkin seeds", "Hemp seeds", "Ground flax"]
+    "Pantry": ["Oat milk (unsweetened)", "Fenugreek (methi) seeds", "Cinnamon", "Apple cider vinegar", "Millet / ragi", "Turmeric", "Black pepper", "Tahini / olive oil"]
+    "Supplements": ["Zomelis D 10", "Glycomet GP 0.5", "Vit B12", "Ashwagandha", "Q10", "Vilvam", "Madhumegam", "Magnesium", "Zinc picolinate"]
+
+# Exact prep, at the right time — removes the decision so you stay on-plan. (Evening
+# soak + morning steam-dal/shake live in the soak + house cards; this adds the rest.)
+meal_prep:
+  - {time: "07:45", title: "Pack for the kitchen",
+     items: ["Carry protein (MyPro / tofu / edamame) to add at the solar kitchen — lunch & dinner"]}
+  - {day: saturday, time: "17:00", title: "Weekly batch prep",
+     items: ["Pressure-cook a batch of dal + chole (2–3 days)", "Sprout a big jar of moong / chana", "Portion tofu & tempeh"]}
+
 soak_tonight_default: &soak "1 tsp methi (fenugreek) for tomorrow's morning water · keep moong sprouting (1–2 days ahead)"
 
 # ── PHASE 1 KICKSTART (intensive, ~1200 kcal) — shown when health.yaml phase: 1 ──
