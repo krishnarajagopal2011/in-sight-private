@@ -3,7 +3,7 @@
 // connection (showing the last view); always go to the network for the JSON API
 // (the pages' own polling handles staleness), falling back to nothing so the
 // page's offline-first logic keeps the last data on screen.
-const CACHE = "insight-v11";
+const CACHE = "insight-v12";
 const SHELL = [
   "/life", "/projects",
   "/static/css/kiosk.css",

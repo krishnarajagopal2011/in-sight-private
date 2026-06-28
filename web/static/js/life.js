@@ -146,7 +146,7 @@ function collectEvents(data) {
         p.appendChild(el("div", "panel-title", `💊 ${s.name}`));
         p.appendChild(el("div", "panel-time", s.time));
         p.appendChild(checklist(s.items, `supp|${s.name}`));
-        p.appendChild(el("div", "meal-note", "30 min before · with water"));
+        if (s.note) p.appendChild(el("div", "meal-note", s.note));
       }, { due }),
     });
   }

@@ -25,7 +25,7 @@ supplements:
     minutes_before: 30
     items: ["Zomelis D 10", "Glycomet GP 0.5", "Vit B12", "Ashwagandha", "Q10", "Vilvam ×3", "Madhumegam ×2"]
   - meal: "Dinner"
-    minutes_before: 30
+    minutes_before: -10          # negative = AFTER the meal (immediately after dinner)
     items: ["Glycomet GP 0.5", "Magnesium", "Zinc Picolinate", "Vilvam ×1", "Madhumegam ×2"]
 
 # ── Groceries & prep — so nothing runs out and there's no "what do I make?" ──────

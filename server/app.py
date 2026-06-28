@@ -123,8 +123,12 @@ def healthcheck():
 def api_projects():
     body, status = _snapshot_body("projects")
     if body.get("ok"):
+        cfg = load_config()
+        now = dt.datetime.now()
         # Live focus state (food timing → suggest deep vs. light tasks).
-        body["data"]["focus"] = focus.build_focus(load_config(), dt.datetime.now())
+        body["data"]["focus"] = focus.build_focus(cfg, now)
+        # Past wind-down / before wake → don't push work; the screen goes to rest.
+        body["data"]["rest"] = schedules.rest_now(cfg, now)
     return jsonify(body), status
 
 

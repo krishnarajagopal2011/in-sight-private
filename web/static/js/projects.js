@@ -41,6 +41,13 @@ function render(data) {
   // block, two at a time by priority.
   const focus = document.getElementById("focus");
   clear(focus);
+  // Past wind-down / before wake: don't push work — go quiet so sleep wins.
+  if (data.rest) {
+    focus.appendChild(el("div", "focus-kicker", "Rest"));
+    focus.appendChild(el("div", "focus-title", "🌙 Wind down · lights out"));
+    focus.appendChild(el("div", "focus-meta", "Phone out of the bedroom. Work resumes when you wake."));
+    return;
+  }
   const opts = (data.immediate || []).slice(0, 2);
   if (opts.length) {
     focus.appendChild(el("div", "focus-kicker", opts.length > 1 ? "Do one of these next" : "Do this next"));

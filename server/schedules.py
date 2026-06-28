@@ -80,13 +80,36 @@ def _supplements_today(food: dict[str, Any], meals: list) -> list[dict[str, Any]
         )
         if not mtime:
             continue
+        mins = int(s.get("minutes_before", 30) or 30)
+        meal = s.get("meal", "meal").lower()
+        if mins < 0:
+            label, note = f"After {meal}", "right after · with water"
+        else:
+            label, note = f"Before {meal}", f"{mins} min before · with water"
         out.append({
-            "name": f"Before {s.get('meal', 'meal').lower()}",
-            "time": _minus_minutes(mtime, int(s.get("minutes_before", 30) or 30)),
+            "name": label,
+            "time": _minus_minutes(mtime, mins),
             "items": [str(i) for i in s.get("items", []) or []],
+            "note": note,
         })
     out.sort(key=lambda x: x["time"])
     return out
+
+
+def rest_now(cfg: dict[str, Any], now: dt.datetime) -> bool:
+    """True when it's wind-down/sleep time — before wake or after the wind-down block
+    starts. The work screen uses this to go quiet instead of pushing tasks at night."""
+    blocks = (cfg.get("schedule", {}) or {}).get("blocks", []) or []
+    starts = [b.get("start", "") for b in blocks if b.get("start")]
+    if not starts:
+        return False
+    wake = min(starts)
+    wind = next((b.get("start") for b in blocks if b.get("kind") == "winddown"), None)
+    if not wind:
+        ends = [b.get("end", "") for b in blocks if b.get("end")]
+        wind = max(ends) if ends else "20:00"
+    hm = now.strftime("%H:%M")
+    return hm < wake or hm >= wind
 
 
 # ── Fitness ──────────────────────────────────────────────────────────────────
