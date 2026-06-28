@@ -22,7 +22,7 @@ guidance:
 # whatever time breakfast/dinner lands at). Skipped on days without that meal.
 supplements:
   - meal: "Breakfast"
-    minutes_before: 30
+    minutes_before: -10          # negative = AFTER the meal (all meds taken after food)
     items: ["Zomelis D 10", "Glycomet GP 0.5", "Vit B12", "Ashwagandha", "Q10", "Vilvam ×3", "Madhumegam ×2"]
   - meal: "Dinner"
     minutes_before: -10          # negative = AFTER the meal (immediately after dinner)
