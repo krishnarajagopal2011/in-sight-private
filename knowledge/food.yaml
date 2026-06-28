@@ -1,0 +1,189 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# FOOD KNOWLEDGE  ·  100% VEGAN  ·  rebuilt from knowledge/meal-plan.md
+# ─────────────────────────────────────────────────────────────────────────────
+# Goal: lower HbA1c 9% → 6%, then Type-2 remission. ~180P / 150C / 75F / 55 fibre.
+# Low-GI, anti-inflammatory; muscle + testosterone support. NOT medical advice.
+
+targets: {protein_g: 180, carbs_g: 150, fat_g: 75, fiber_g: 55, calories: 1980}
+
+soak_by: "19:00"
+prep_anchor: "Eat veg→protein→starch · 1 tbsp ACV before lunch & dinner · 10–15 min walk after each main meal."
+
+guidance:
+  - "Order every meal: veg/salad & fibre first → protein & fat → starchy carb last."
+  - "Walk 10–15 min after breakfast, lunch and dinner."
+  - "1 tbsp apple cider vinegar in water before lunch & dinner."
+  - "Carbs ~150 g, low-GI only — no juice, white rice, sugar, maida, sweets."
+  - "Front-load carbs to morning/training; lightest dinner at 18:30 for a 13–14 h fast."
+  - "Soaked fenugreek + cinnamon daily; sprout dals 1–2 days ahead."
+
+daily_supplements:
+  - {name: "Vitamin B12 (methyl) 1000 µg",            when: "morning — vegan-essential"}
+  - {name: "Vitamin D3 (vegan/lichen) 2000–4000 IU",  when: "morning, with fat"}
+  - {name: "Algae omega-3 (EPA+DHA) 500 mg",          when: "with a meal"}
+  - {name: "Creatine monohydrate 5 g",                when: "any time"}
+  - {name: "Magnesium glycinate 300 mg",              when: "before bed"}
+
+soak_tonight_default: &soak "1 tsp methi (fenugreek) for tomorrow's morning water · keep moong sprouting (1–2 days ahead)"
+
+# ── PHASE 1 KICKSTART (intensive, ~1200 kcal) — shown when health.yaml phase: 1 ──
+# ⚠️ Only run once your doctor has adjusted Glimepiride & SGLT2 meds.
+kickstart:
+  targets: {protein_g: 140, carbs_g: 80, fat_g: 35, fiber_g: 45, calories: 1200}
+  soak_tonight: *soak
+  meals:
+    - {name: "Early morning", time: "05:00", items: ["Soaked fenugreek water", "5 almonds"],
+       protein_g: 2, carbs_g: 2, fat_g: 5, fiber_g: 2, calories: 61}
+    - {name: "Breakfast", time: "08:00", note: "post-lift (lighter in Phase 1)",
+       items: ["1.5 scoops MyPro + 150 ml oat milk", "1 tbsp ground flax", "cinnamon"],
+       protein_g: 40, carbs_g: 18, fat_g: 9, fiber_g: 5, calories: 313}
+    - {name: "Mid-morning", time: "10:00", items: ["1 small fruit (½ cup berries / 1 guava)"],
+       protein_g: 1, carbs_g: 10, fat_g: 1, fiber_g: 4, calories: 53}
+    - {name: "Lunch", time: "12:30", note: "ACV first · veg→protein, NO grain · 10-min walk after",
+       items: ["200 g tofu", "1 bowl dal", "large non-starchy salad (no grain)"],
+       protein_g: 40, carbs_g: 18, fat_g: 13, fiber_g: 14, calories: 349}
+    - {name: "Evening", time: "16:30", items: ["1 scoop MyPro", "1 cup sprouted moong"],
+       protein_g: 32, carbs_g: 18, fat_g: 2, fiber_g: 9, calories: 218}
+    - {name: "Dinner", time: "18:30", note: "ACV first · 10-min walk after",
+       items: ["1 millet idli", "1 bowl sambhar", "½ cup edamame", "sautéed greens"],
+       protein_g: 25, carbs_g: 16, fat_g: 5, fiber_g: 11, calories: 209}
+
+# ── 7-day maintenance plan (~150 g carbs) ────────────────────────────────────
+days:
+  monday:        # Gym + Pickleball
+    soak_tonight: *soak
+    meals:
+      - {name: "Early morning", time: "05:00", items: ["Soaked fenugreek water", "10 almonds", "1 tbsp pumpkin seeds"],
+         protein_g: 5, carbs_g: 4, fat_g: 10, fiber_g: 3, calories: 126}
+      - {name: "Breakfast", time: "08:00", note: "post-lift",
+         items: ["1.5 scoops MyPro + 150 ml oat milk", "2 tbsp hemp seeds", "1 tbsp ground flax", "cinnamon"],
+         protein_g: 51, carbs_g: 22, fat_g: 19, fiber_g: 6, calories: 463}
+      - {name: "Mid-morning", time: "10:00", items: ["6 walnuts", "½ cup papaya"],
+         protein_g: 5, carbs_g: 14, fat_g: 13, fiber_g: 4, calories: 193}
+      - {name: "Lunch", time: "12:30", note: "ACV first · veg→protein→starch · 10-min walk after",
+         items: ["200 g tofu", "1.5 bowls moong dal", "cucumber–tomato salad", "¼ cup millet"],
+         protein_g: 44, carbs_g: 48, fat_g: 19, fiber_g: 19, calories: 539}
+      - {name: "Pre-pickleball", time: "16:00", items: ["1.5 scoops MyPro", "1.5 cups sprouted moong (lemon + salt)"],
+         protein_g: 51, carbs_g: 32, fat_g: 4, fiber_g: 13, calories: 368}
+      - {name: "Dinner", time: "18:30", note: "ACV first · 10-min walk after",
+         items: ["1–2 small millet idli", "1 bowl sambhar", "¾ cup edamame", "sautéed spinach"],
+         protein_g: 22, carbs_g: 30, fat_g: 9, fiber_g: 15, calories: 289}
+
+  tuesday:       # Yoga
+    soak_tonight: *soak
+    meals:
+      - {name: "Early morning", time: "05:00", items: ["Soaked fenugreek water", "10 almonds", "1 tbsp pumpkin seeds"],
+         protein_g: 5, carbs_g: 4, fat_g: 10, fiber_g: 3, calories: 126}
+      - {name: "Breakfast", time: "08:00",
+         items: ["1.5 scoops MyPro + 150 ml oat milk", "2 tbsp hemp seeds", "1 tbsp ground flax", "cinnamon"],
+         protein_g: 51, carbs_g: 22, fat_g: 19, fiber_g: 6, calories: 463}
+      - {name: "Mid-morning", time: "10:00", items: ["6 walnuts", "1 guava"],
+         protein_g: 5, carbs_g: 14, fat_g: 13, fiber_g: 4, calories: 193}
+      - {name: "Lunch", time: "12:30", note: "ACV first · veg→protein→starch · 10-min walk after",
+         items: ["200 g tofu", "1.5 bowls masoor dal", "carrot–beet salad", "¼ cup millet"],
+         protein_g: 44, carbs_g: 48, fat_g: 19, fiber_g: 19, calories: 539}
+      - {name: "Evening", time: "17:00", items: ["1.5 scoops MyPro", "1.5 cups sprouted moong (chaat masala)"],
+         protein_g: 51, carbs_g: 32, fat_g: 4, fiber_g: 13, calories: 368}
+      - {name: "Dinner", time: "18:30", note: "ACV first · 10-min walk after",
+         items: ["1–2 small millet idli", "1 bowl sambhar", "tofu bhurji", "sautéed kale"],
+         protein_g: 22, carbs_g: 30, fat_g: 9, fiber_g: 15, calories: 289}
+
+  wednesday:     # Gym + Pickleball
+    soak_tonight: *soak
+    meals:
+      - {name: "Early morning", time: "05:00", items: ["Soaked fenugreek water", "10 almonds", "1 tbsp pumpkin seeds"],
+         protein_g: 5, carbs_g: 4, fat_g: 10, fiber_g: 3, calories: 126}
+      - {name: "Breakfast", time: "08:00", note: "post-lift",
+         items: ["1.5 scoops MyPro + 150 ml oat milk", "2 tbsp hemp seeds", "1 tbsp ground flax", "cinnamon"],
+         protein_g: 51, carbs_g: 22, fat_g: 19, fiber_g: 6, calories: 463}
+      - {name: "Mid-morning", time: "10:00", items: ["6 walnuts", "1 small green apple"],
+         protein_g: 5, carbs_g: 14, fat_g: 13, fiber_g: 4, calories: 193}
+      - {name: "Lunch", time: "12:30", note: "ACV first · veg→protein→starch · 10-min walk after",
+         items: ["200 g tofu", "1.5 bowls toor dal", "mixed leafy salad", "¼ cup millet"],
+         protein_g: 44, carbs_g: 48, fat_g: 19, fiber_g: 19, calories: 539}
+      - {name: "Pre-pickleball", time: "16:00", items: ["1.5 scoops MyPro", "1.5 cups sprouted moong + black chana"],
+         protein_g: 51, carbs_g: 32, fat_g: 4, fiber_g: 13, calories: 368}
+      - {name: "Dinner", time: "18:30", note: "ACV first · 10-min walk after",
+         items: ["1–2 small millet idli", "1 bowl sambhar", "¾ cup edamame", "sautéed broccoli"],
+         protein_g: 22, carbs_g: 30, fat_g: 9, fiber_g: 15, calories: 289}
+
+  thursday:      # Yoga
+    soak_tonight: *soak
+    meals:
+      - {name: "Early morning", time: "05:00", items: ["Soaked fenugreek water", "10 almonds", "1 tbsp pumpkin seeds"],
+         protein_g: 5, carbs_g: 4, fat_g: 10, fiber_g: 3, calories: 126}
+      - {name: "Breakfast", time: "08:00",
+         items: ["1.5 scoops MyPro + 150 ml oat milk", "2 tbsp hemp seeds", "1 tbsp ground flax", "cinnamon"],
+         protein_g: 51, carbs_g: 22, fat_g: 19, fiber_g: 6, calories: 463}
+      - {name: "Mid-morning", time: "10:00", items: ["6 walnuts", "½ cup mixed berries"],
+         protein_g: 5, carbs_g: 14, fat_g: 13, fiber_g: 4, calories: 193}
+      - {name: "Lunch", time: "12:30", note: "ACV first · veg→protein→starch · 10-min walk after",
+         items: ["200 g tofu", "1.5 bowls chana dal", "cabbage–carrot slaw", "¼ cup millet"],
+         protein_g: 44, carbs_g: 48, fat_g: 19, fiber_g: 19, calories: 539}
+      - {name: "Evening", time: "17:00", items: ["1.5 scoops MyPro", "1.5 cups sprouted moong (chilli + lemon)"],
+         protein_g: 51, carbs_g: 32, fat_g: 4, fiber_g: 13, calories: 368}
+      - {name: "Dinner", time: "18:30", note: "ACV first · 10-min walk after",
+         items: ["1–2 small millet idli", "1 bowl sambhar", "tempeh", "sautéed methi greens"],
+         protein_g: 22, carbs_g: 30, fat_g: 9, fiber_g: 15, calories: 289}
+
+  friday:        # Gym + Pickleball
+    soak_tonight: *soak
+    meals:
+      - {name: "Early morning", time: "05:00", items: ["Soaked fenugreek water", "10 almonds", "1 tbsp pumpkin seeds"],
+         protein_g: 5, carbs_g: 4, fat_g: 10, fiber_g: 3, calories: 126}
+      - {name: "Breakfast", time: "08:00", note: "post-lift",
+         items: ["1.5 scoops MyPro + 150 ml oat milk", "2 tbsp hemp seeds", "1 tbsp ground flax", "cinnamon"],
+         protein_g: 51, carbs_g: 22, fat_g: 19, fiber_g: 6, calories: 463}
+      - {name: "Mid-morning", time: "10:00", items: ["6 walnuts", "1 small orange"],
+         protein_g: 5, carbs_g: 14, fat_g: 13, fiber_g: 4, calories: 193}
+      - {name: "Lunch", time: "12:30", note: "ACV first · veg→protein→starch · 10-min walk after",
+         items: ["200 g tofu", "1.5 bowls moong–masoor dal", "cucumber–onion salad", "¼ cup millet"],
+         protein_g: 44, carbs_g: 48, fat_g: 19, fiber_g: 19, calories: 539}
+      - {name: "Pre-pickleball", time: "16:00", items: ["1.5 scoops MyPro", "1.5 cups sprouted matki + moong"],
+         protein_g: 51, carbs_g: 32, fat_g: 4, fiber_g: 13, calories: 368}
+      - {name: "Dinner", time: "18:30", note: "ACV first · 10-min walk after",
+         items: ["1–2 small ragi/millet idli", "1 bowl sambhar", "¾ cup edamame", "sautéed bok choy"],
+         protein_g: 22, carbs_g: 30, fat_g: 9, fiber_g: 15, calories: 289}
+
+  # saturday rotates weekly through refuel themes — see `variants.saturday` below.
+
+  sunday:        # Water-fast day (rest). Hydration actions only — calorie-free.
+    fast: true
+    soak_tonight: ""
+    meals:
+      - {name: "Morning", time: "07:00", items: ["Salt + lemon water", "Magnesium"]}
+      - {name: "Midday",  time: "12:00", items: ["Water — aim 3–4 L today", "Pinch of salt + potassium"]}
+      - {name: "Evening", time: "17:00", items: ["Salt water", "Magnesium"]}
+
+# ── Saturday refuel rotation ─────────────────────────────────────────────────
+# A different theme each week (same ~180P/150C/75F target). The morning/breakfast/
+# mid/evening meals are shared (YAML anchors); the lunch & dinner mains vary.
+variants:
+  saturday:
+    - label: "South Indian refuel"
+      soak_tonight: *soak
+      meals:
+        - &sat_early {name: "Early morning", time: "05:00", items: ["Soaked fenugreek water", "10 almonds", "1 tbsp pumpkin seeds"], protein_g: 5, carbs_g: 4, fat_g: 10, fiber_g: 3, calories: 126}
+        - &sat_break {name: "Breakfast", time: "08:00", items: ["1.5 scoops MyPro + 150 ml oat milk", "2 tbsp hemp seeds", "1 tbsp ground flax", "cinnamon"], protein_g: 51, carbs_g: 22, fat_g: 19, fiber_g: 6, calories: 463}
+        - &sat_mid {name: "Mid-morning", time: "10:00", items: ["6 walnuts", "1 small pear"], protein_g: 5, carbs_g: 14, fat_g: 13, fiber_g: 4, calories: 193}
+        - {name: "Lunch", time: "12:30", note: "ACV first · veg→protein→starch · 10-min walk after", items: ["200 g tofu", "0.5 bowl rajma", "1 bowl dal", "salad (¼ cup brown rice optional)"], protein_g: 44, carbs_g: 48, fat_g: 19, fiber_g: 19, calories: 539}
+        - &sat_eve {name: "Evening", time: "17:00", items: ["1.5 scoops MyPro", "1.5 cups sprouted moong + handful peanuts"], protein_g: 51, carbs_g: 32, fat_g: 4, fiber_g: 13, calories: 368}
+        - {name: "Dinner", time: "18:30", note: "ACV first · 10-min walk after", items: ["1–2 small millet idli", "1 bowl sambhar", "tofu", "sautéed green beans"], protein_g: 22, carbs_g: 30, fat_g: 9, fiber_g: 15, calories: 289}
+    - label: "Mediterranean bowl"
+      soak_tonight: *soak
+      meals:
+        - *sat_early
+        - *sat_break
+        - *sat_mid
+        - {name: "Lunch", time: "12:30", note: "ACV first · veg→protein→starch · 10-min walk after", items: ["Baked falafel (chickpea)", "quinoa tabbouleh", "hummus", "big Greek salad + EVOO"], protein_g: 44, carbs_g: 48, fat_g: 19, fiber_g: 19, calories: 539}
+        - *sat_eve
+        - {name: "Dinner", time: "18:30", note: "ACV first · 10-min walk after", items: ["Grilled tofu / tempeh", "roasted veg (zucchini, peppers)", "½ cup quinoa", "tahini drizzle"], protein_g: 22, carbs_g: 30, fat_g: 9, fiber_g: 15, calories: 289}
+    - label: "East Asian"
+      soak_tonight: *soak
+      meals:
+        - *sat_early
+        - *sat_break
+        - *sat_mid
+        - {name: "Lunch", time: "12:30", note: "ACV first · veg→protein→starch · 10-min walk after", items: ["Tofu & edamame stir-fry", "mixed veg", "½ cup millet / soba", "sesame"], protein_g: 44, carbs_g: 48, fat_g: 19, fiber_g: 19, calories: 539}
+        - *sat_eve
+        - {name: "Dinner", time: "18:30", note: "ACV first · 10-min walk after", items: ["Tempeh (low-sugar teriyaki)", "bok choy + broccoli", "½ cup brown rice"], protein_g: 22, carbs_g: 30, fat_g: 9, fiber_g: 15, calories: 289}

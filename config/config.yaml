@@ -1,0 +1,63 @@
+# in_sight configuration.
+# Copy to config/config.yaml and edit. Keep config.yaml chmod 600 (it holds a password).
+
+server:
+  host: 0.0.0.0
+  port: 8137
+  refresh_seconds: 30          # how often the browser re-polls the API
+  stale_after_seconds: 93600   # 26h — snapshot older than this shows a "stale" dot
+
+# ── Screen 1: parallel projects + immediate tasks ────────────────────────────
+# Source = dVerse central command ("What's Today"). Goals become projects;
+# your top priorities become the immediate tasks.
+dverse:
+  provider: dverse             # 'dverse' (live) or 'local' (use *_fallback below)
+  base_url: https://dverse-central-command.vercel.app
+  email: krishna@dverselabs.com
+  # Prefer the env var INSIGHT_DVERSE_PASSWORD over putting the password here.
+  password: ""
+
+# Used only when dverse.provider == 'local' (offline / no account).
+projects_fallback:
+  - {title: "Win Jaipur Rugs DnD Automation", milestone: "Build motif tooling & pitch",
+     next_action: "Build motif tooling & pitch", status: ACTIVE, pct: 0}
+  - {title: "Confirm & deliver Louver project", milestone: "Fix prototype",
+     next_action: "Fix prototype", status: ACTIVE, pct: 0}
+  - {title: "Confirm Baby Monitor Bracelet", milestone: "Staff up & submit proposal",
+     next_action: "Staff up & submit proposal", status: ACTIVE, pct: 0}
+  - {title: "Confirm & deliver Turiya website", milestone: "Get 30% advance & assets",
+     next_action: "Get 30% advance & assets", status: ACTIVE, pct: 0}
+  - {title: "Confirm & deliver Be.You webapp", milestone: "Secure confirmation, advance & 3D pipeline",
+     next_action: "Secure confirmation, advance & 3D pipeline", status: ACTIVE, pct: 0}
+  - {title: "Fundraising & Applications", milestone: "Action items",
+     next_action: "Approve application: iCreate Accelerator Programme", status: ACTIVE, pct: 0}
+immediate_fallback:
+  - {title: "Approve application: iCreate Accelerator Programme", priority: High,
+     goal: "Fundraising & Applications"}
+  - {title: "Review 5 new application leads", priority: Normal,
+     goal: "Fundraising & Applications"}
+
+# ── Google Calendar (appointments on the Life screen) ────────────────────────
+# Two accounts supported. Setup (one time):
+#   1. Google Cloud console → enable "Google Calendar API"; OAuth consent screen
+#      (External) → add both your Google accounts as test users.
+#   2. Create an OAuth client of type "Desktop app"; paste its id/secret below.
+#   3. Authorize each account (mints a refresh token into config/google_tokens.json):
+#        python scripts/gcal_auth.py "Personal"
+#        python scripts/gcal_auth.py "Work"
+# Leave enabled: false to turn the whole feature off.
+google_calendar:
+  enabled: false
+  client_id: ""           # ...apps.googleusercontent.com
+  client_secret: ""
+  accounts:
+    - {label: "Personal", color: "#6bd0a0"}   # label must match the auth command
+    - {label: "Work",     color: "#6aa6ff"}
+
+# ── Screen 2: life ───────────────────────────────────────────────────────────
+# The life domain (fitness / food / house / travel) lives in the editable
+# knowledge base, not here. Edit those files instead:
+#   knowledge/fitness.yaml   knowledge/food.yaml
+#   knowledge/house.yaml     knowledge/travel.yaml
+# Each is merged in automatically (knowledge/<name>.yaml -> key <name>) and
+# overrides anything you put under the same key here.

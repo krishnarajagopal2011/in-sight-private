@@ -1,0 +1,30 @@
+# Fitness — Mon/Wed/Fri gym + pickleball; Tue/Thu yoga; Sat long cardio; Sun rest.
+weekly:
+  monday:
+    - {name: Gym,        start: "06:00", end: "07:30", detail: "Strength"}
+    - {name: Pickleball, start: "17:00", end: "18:00", detail: ""}
+  tuesday:
+    - {name: Yoga,       start: "06:00", end: "07:30", detail: ""}
+  wednesday:
+    - {name: Gym,        start: "06:00", end: "07:30", detail: "Strength"}
+    - {name: Pickleball, start: "17:00", end: "18:00", detail: ""}
+  thursday:
+    - {name: Yoga,       start: "06:00", end: "07:30", detail: ""}
+  friday:
+    - {name: Gym,        start: "06:00", end: "07:30", detail: "Strength"}
+    - {name: Pickleball, start: "17:00", end: "18:00", detail: ""}
+  saturday:
+    # `rotate` cycles through the `rotations` list below by week — a different
+    # route each Saturday. Keep it fed/Zone-2 and carry fast sugar.
+    - {name: "Long cardio", start: "06:30", end: "08:30",
+       detail: "Zone 2, fed · carry fast sugar", rotate: cardio}
+  sunday: []          # rest (fast day)
+
+# Rotating options — edit these to your nearby routes; one is picked each week.
+rotations:
+  cardio:
+    - "15 km walk around Auroville"
+    - "Cycle to Pondicherry promenade & back"
+    - "Cycle to Paradise Beach (Chunnambar)"
+    - "Long ride along the ECR coast"
+    - "Long walk — Serenity Beach"

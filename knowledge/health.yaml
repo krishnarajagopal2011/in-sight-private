@@ -1,0 +1,56 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# HEALTH / DIABETIC REMISSION  ·  rebuilt to your plan
+# ⚠️ NOT medical advice. Don't start Phase 1 until your doctor adjusts your meds.
+
+# 1 = intensive kickstart (uses food.yaml `kickstart`); 4 = maintenance.
+phase: 1
+phase_start: "2026-06-25"
+kickstart_days: [monday, tuesday, wednesday, thursday, friday]   # weekdays kickstart; Sat fed + long cardio, Sun water fast
+
+phase_labels:
+  0: "Prep"
+  1: "Kickstart"
+  2: "Continued loss"
+  3: "Reintroduction"
+  4: "Maintenance"
+
+targets:
+  weight_kg: {start: 93, target: 70}
+  waist_cm:  {target: 90}
+  hba1c_pct: {start: 9, target: 6}
+  fasting_glucose: {low: 80, high: 110}
+  post_meal_glucose_max: 140
+
+checkpoints:
+  - {label: "Doctor visit + med adjustment", offset_weeks: 0}
+  - {label: "HbA1c recheck", offset_weeks: 6}
+  - {label: "HbA1c recheck", offset_weeks: 12}
+
+safety:
+  show_in_phases: [0, 1]
+  reminders:
+    - "Carry glucose tabs · hypo signs: shaking, sweating, dizziness, confusion"
+    - "Keep ketone strips · DKA: nausea, vomiting, fruity breath, rapid breathing → ER"
+    - "Don't train fasted or hard during medication changes"
+
+training_note_intensive: "Lighter today — shorter, not to failure. Pickleball optional."
+
+# Focus: peak right after waking, declining through the day; high-protein breakfast
+# extends the peak; a carb-heavy lunch causes a post-lunch dip (low-carb doesn't).
+focus:
+  wake_time: "05:00"
+  morning_peak_hours: 5
+  breakfast_protein_threshold_g: 35
+  breakfast_extends_to: "14:00"
+  lunch_carb_dip_threshold_g: 45
+  post_lunch_dip_after_min: 30
+  post_lunch_dip_dur_min: 90
+  dip_windows: []
+  electrolytes:
+    - {time: "10:30", label: "Salt + lemon water"}
+    - {time: "16:00", label: "Pinch of salt + magnesium (greens)"}
+
+log_reminders:
+  fasting: {time: "06:30", label: "Log fasting glucose"}
+  post_meal_after_min: 120
+  main_meals: ["Breakfast", "Lunch", "Dinner"]

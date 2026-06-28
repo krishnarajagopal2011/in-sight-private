@@ -1,0 +1,46 @@
+# House responsibilities — transcribed from the "House Responsibilities" sheet.
+# A day = daily (on daily_days) + weekly[that day] + monthly due today, grouped
+# by time-of-day. A section shows only while now is within its from–to window.
+sections:
+  - {key: early_morning,     label: "Early morning",       from: "05:00", to: "11:00"}
+  - {key: afternoon_evening, label: "Afternoon – evening", from: "12:00", to: "19:00"}
+  - {key: night,             label: "Night",               from: "19:00", to: "23:59"}
+
+daily_days: [monday, tuesday, wednesday, thursday, friday]
+daily:
+  early_morning:
+    - "Steam dal"
+    - "Make protein shake"
+    - "Vegetable cutting"
+    - "Morning dish wash"
+  night:
+    - "Recharge emergency lights / headlamps / cycle lights"
+    - "2x cycle charging"
+
+weekly:
+  tuesday:
+    early_morning:
+      - "Garden work (leaf cleaning, planting, weeding, pruning)"
+      - "Car wash"
+      - "2x cycle cleaning"
+      - "Portico dry + wet cleaning"
+    afternoon_evening:
+      - "Folding clothes"
+  wednesday:
+    afternoon_evening:
+      - "Ironing clothes"
+  thursday:
+    afternoon_evening:
+      - "Master bedroom toilet cleaning"
+  friday:
+    afternoon_evening:
+      - "Broom + mop"
+      - "Garbage disposal"
+    night:
+      - "2 Laptop + PC cleaning"
+  saturday:
+    afternoon_evening:
+      - "Checking medicine stocks & expiry dates"
+
+monthly:
+  - {when: first-monday, section: early_morning, task: "Rent payment"}

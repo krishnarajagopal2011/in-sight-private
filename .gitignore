@@ -1,18 +1,9 @@
-# Secrets — never commit (comments must be on their own line, not inline)
-config/config.yaml
+# Private deployment repo — tracks personal config + knowledge; excludes secrets.
 config/.env
 config/google_tokens.json
-
-# Personal knowledge — real config stays local; only *.example.yaml is committed
-knowledge/*.yaml
-!knowledge/*.example.yaml
-knowledge/meal-plan.md
-
-# Editor / local
 .claude/
-
-# Runtime / build
 .venv/
 __pycache__/
 *.pyc
 data/
+knowledge/meal-plan.md

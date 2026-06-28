@@ -1,0 +1,62 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# DAILY SCHEDULE — practical time blocks (what you actually run).
+# Ideal times are intentionally NOT stored here; the screen shows practical only.
+# The "Right now" card flips to the CURRENT block and shows TWO options — pick the
+# one that pulls you. A 15-min switch buffer sits between blocks (ADHD).
+#
+# The whole point: never face an overwhelming list — just see the one clear thing
+# to do right now. That IS the intervention (no app-blocking needed).
+
+buffer_min: 15
+
+# Call parents every alternate day, counting from `since` (inclusive). Surfaces as
+# a forced option in the afternoon recharge block on due days.
+parents_call:
+  every_days: 2
+  since: "2026-06-28"
+  label: "Call parents (alternate day)"
+
+# kinds: routine (single action) · focus (deep/creative) · danger (high-craving →
+# clean-dopamine replacements) · winddown (protects the sleep boundary).
+blocks:
+  - {name: "Wake — get up", start: "04:00", end: "04:30", kind: danger,
+     options: ["Cold shower now", "Feet on floor — first line of the Focus block"]}
+
+  - {name: "Cold shower", start: "04:30", end: "04:45", kind: routine,
+     options: ["Cold shower"]}
+
+  - {name: "Meditation + breathwork", start: "04:45", end: "05:00", kind: routine,
+     options: ["Meditation", "Breathwork"]}
+
+  - {name: "Focus block", start: "05:00", end: "06:00", kind: focus,
+     options: ["Grant writing", "Concept detailing"]}
+
+  # Afternoon = your biggest danger window AND your buffer/partner time. Fill it
+  # with connection + movement + light so the rabbit-hole has no room. Options are
+  # built on the clean-dopamine levers: light, movement, cold, protein, connection.
+  - name: "Recharge — afternoon"
+    start: "14:00"
+    end: "18:00"
+    kind: danger
+    community: true
+    options:
+      - "Partner / intimacy time"
+      - "Outdoor — walk in the light"
+      - "Pickleball / movement"
+      - "Cold splash + reset"
+      - "Roasted chana + fruit (skip fried / sweet)"
+
+  # Protects the 8pm sleep boundary so the late-night danger window never opens.
+  - {name: "Wind down", start: "19:00", end: "20:00", kind: winddown,
+     options: ["Read a book", "Music — lie down"],
+     boundary: "Phone out of the bedroom · lights out by 20:00"}
+
+# Recurring community events (Auroville) — kept here instead of parsing the weekly
+# newsletter. An event surfaces as an option in whatever block its time falls in.
+# ⚠️ PLACEHOLDERS — correct the names / days / times to your real regulars. Editing
+# them here (or via the setup wizard) flows straight into the screen on next sync.
+events:
+  - {name: "Pitanga class", days: [monday, wednesday], start: "16:00", end: "17:30", place: "Pitanga"}
+  - {name: "Solitude Farm lunch", days: [tuesday, thursday], start: "12:30", end: "14:30", place: "Solitude"}
+  - {name: "Film · Cinema Paradiso", days: [friday], start: "20:00", end: "22:00", place: "Town Hall"}
+  - {name: "Visitors Centre market", days: [saturday], start: "09:30", end: "13:00", place: "Visitors Centre"}

@@ -1,0 +1,6 @@
+# Upcoming trips. Past trips (end before today) hide automatically. Dates YYYY-MM-DD.
+trips:
+  - {destination: "Jaipur",    start: "2026-07-02", end: "2026-07-04",
+     purpose: "Jaipur Rugs DnD pitch", note: "6E-203 09:40"}
+  - {destination: "Bengaluru", start: "2026-07-18", end: "2026-07-20",
+     purpose: "Investor meetings",     note: ""}
