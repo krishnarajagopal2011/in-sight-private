@@ -37,6 +37,9 @@ _SETTINGS = server_settings(_CFG)
 # Make sure the DB/tables exist even when served by `waitress-serve server.app:app`
 # (which never calls run()), so a fresh Render disk works on first boot.
 db.init()
+# If a durable Postgres (DATABASE_URL) is configured, restore /log history into the
+# fresh ephemeral SQLite so health readings survive free-tier resets. No-op otherwise.
+db.restore_readings_from_pg()
 
 # Optional password gate — ON only when INSIGHT_PASSWORD is set (so a public URL
 # isn't wide open). The local kiosk leaves it unset and stays frictionless.

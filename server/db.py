@@ -7,6 +7,7 @@ snapshots; app.py reads them.
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import time
 from pathlib import Path
@@ -43,6 +44,87 @@ _READING_FIELDS = [
     "weight_kg", "waist_cm", "fasting_glucose", "post_meal_glucose",
     "post_meal_label", "hba1c_pct", "ketones", "notes",
 ]
+
+# Optional durable store for /log health readings (a free Postgres like Neon). When
+# DATABASE_URL is set, each logged reading is ALSO written to Postgres, and on startup
+# the local (ephemeral) SQLite is restored from it — so history survives the free
+# tier's disk resets. Reads still hit local SQLite, so the screen never queries
+# Postgres on its 30s poll. Unset = pure local SQLite, exactly as before.
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+_PG_SCHEMA = """
+CREATE TABLE IF NOT EXISTS health_readings (
+    id SERIAL PRIMARY KEY,
+    date TEXT NOT NULL,
+    weight_kg DOUBLE PRECISION,
+    waist_cm DOUBLE PRECISION,
+    fasting_glucose DOUBLE PRECISION,
+    post_meal_glucose DOUBLE PRECISION,
+    post_meal_label TEXT,
+    hba1c_pct DOUBLE PRECISION,
+    ketones DOUBLE PRECISION,
+    notes TEXT,
+    created_at DOUBLE PRECISION NOT NULL
+);
+"""
+
+
+def _pg_connect():
+    import psycopg2  # lazy import: only needed when DATABASE_URL is set
+    return psycopg2.connect(DATABASE_URL)
+
+
+def _pg_init() -> None:
+    conn = _pg_connect()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(_PG_SCHEMA)
+    finally:
+        conn.close()
+
+
+def _pg_add_reading(date: str, vals: list, created: float) -> None:
+    conn = _pg_connect()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                f"INSERT INTO health_readings (date, {', '.join(_READING_FIELDS)}, created_at) "
+                f"VALUES (%s, {', '.join(['%s'] * len(_READING_FIELDS))}, %s)",
+                (date, *vals, created),
+            )
+    finally:
+        conn.close()
+
+
+def restore_readings_from_pg(db_path: Path = DB_PATH) -> int:
+    """Rebuild local SQLite health_readings from Postgres (called at startup so a
+    fresh ephemeral disk regains its history). Best-effort; no-op without DATABASE_URL."""
+    if not DATABASE_URL:
+        return 0
+    try:
+        _pg_init()
+        conn = _pg_connect()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"SELECT date, {', '.join(_READING_FIELDS)}, created_at "
+                    "FROM health_readings ORDER BY id"
+                )
+                rows = cur.fetchall()
+        finally:
+            conn.close()
+        init(db_path)
+        with _connect(db_path) as sconn:
+            sconn.execute("DELETE FROM health_readings")
+            sconn.executemany(
+                f"INSERT INTO health_readings (date, {', '.join(_READING_FIELDS)}, created_at) "
+                f"VALUES (?, {', '.join(['?'] * len(_READING_FIELDS))}, ?)",
+                rows,
+            )
+            sconn.commit()
+        return len(rows)
+    except Exception:  # noqa: BLE001 — never block startup on the optional DB
+        return 0
 
 
 def _connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
@@ -101,18 +183,26 @@ def get_meta(key: str, default: Optional[str] = None, db_path: Path = DB_PATH) -
 
 # ── Health readings (logged from the phone form) ─────────────────────────────
 def add_reading(data: dict[str, Any], db_path: Path = DB_PATH) -> int:
-    """Insert one health reading. `data` may include date + any of _READING_FIELDS."""
+    """Insert one health reading. `data` may include date + any of _READING_FIELDS.
+    Mirrors to Postgres when DATABASE_URL is set, so the reading survives a reset."""
     init(db_path)
     date = str(data.get("date") or "")[:10]
     vals = [data.get(f) for f in _READING_FIELDS]
+    created = time.time()
     with _connect(db_path) as conn:
         cur = conn.execute(
             f"INSERT INTO health_readings (date, {', '.join(_READING_FIELDS)}, created_at) "
             f"VALUES (?, {', '.join(['?'] * len(_READING_FIELDS))}, ?)",
-            (date, *vals, time.time()),
+            (date, *vals, created),
         )
         conn.commit()
-        return cur.lastrowid
+        rid = cur.lastrowid
+    if DATABASE_URL:
+        try:
+            _pg_add_reading(date, vals, created)
+        except Exception:  # noqa: BLE001 — local write already succeeded; don't fail the log
+            pass
+    return rid
 
 
 def recent_readings(limit: int = 30, db_path: Path = DB_PATH) -> list[dict[str, Any]]:
