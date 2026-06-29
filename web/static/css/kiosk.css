@@ -46,6 +46,7 @@ html, body {
   flex-direction: column;
   padding: var(--pad);
   gap: var(--gap);
+  position: relative;               /* anchor for the pinned day-menu */
 }
 
 /* Big displays (27" 1440p / 4K): scale type + spacing up a touch so it stays
@@ -290,9 +291,10 @@ ul.clean.meal-items li { cursor: pointer; transition: opacity .2s ease; }
 ul.clean.meal-items li.done { color: var(--faint); text-decoration: line-through; }
 ul.clean.meal-items li.done::before { background: var(--good); border-color: var(--good); }
 
-/* Bottom-right "pick anything from today" list (desktop/kiosk only). */
+/* Bottom-right "pick anything from today" list (desktop/kiosk only). Pinned to the
+   page's bottom-right (absolute) — scrolls with the content instead of floating. */
 .daymenu {
-  position: fixed; right: clamp(12px, 1.4vw, 22px); bottom: clamp(12px, 1.4vw, 22px);
+  position: absolute; right: clamp(12px, 1.4vw, 22px); bottom: clamp(12px, 1.4vw, 22px);
   width: min(280px, 30vw); max-height: 42vh; overflow-y: auto;
   background: rgba(24, 28, 36, .82); border: 1px solid var(--line);
   border-radius: 14px; padding: .8rem 1rem; backdrop-filter: blur(8px); z-index: 30;

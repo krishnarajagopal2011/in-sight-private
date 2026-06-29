@@ -2,7 +2,7 @@
 # A day = daily (on daily_days) + weekly[that day] + monthly due today, grouped
 # by time-of-day. A section shows only while now is within its from–to window.
 sections:
-  - {key: early_morning,     label: "Early morning",       from: "05:00", to: "11:00"}
+  - {key: early_morning,     label: "Early morning",       from: "07:30", to: "11:00"}   # after the 06:00–07:30 workout, so prep doesn't clash with gym
   - {key: afternoon_evening, label: "Afternoon – evening", from: "12:00", to: "19:00"}
   - {key: night,             label: "Night",               from: "19:00", to: "23:59"}
 
