@@ -18,6 +18,8 @@ services:
     startCommand: waitress-serve --host=0.0.0.0 --port=$PORT server.app:app
     healthCheckPath: /api/health
     envVars:
+      - key: TZ
+        value: Asia/Kolkata                   # ← your timezone, so calendar times + day/now are local (not UTC)
       - key: INSIGHT_DB
         value: /tmp/insight.db                # writable ephemeral path (no disk on free)
       - key: INSIGHT_BG_SYNC
