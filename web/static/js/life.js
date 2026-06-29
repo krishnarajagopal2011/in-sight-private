@@ -349,15 +349,28 @@ function render() {
   // any block it falls back to the dVerse top priority.
   const tasks = blockPanel(latest);   // dVerse work only inside a work block, not all day
 
-  // Category cards, skipping any with nothing relevant: Fitness/Food (windowed),
-  // House (current block), Tasks (top priority), plus soak/health nudges.
+  // Only what's happening RIGHT NOW stays bright; everything else in the window
+  // greys out. "Now" = a live/ongoing card or one already due; house + the active
+  // block are inherently now. Upcoming meals/prep/supps, groceries, soak all recede.
+  const isNow = (e) => e.live || minsUntil(e.start) <= 0;
+  const recede = (node) => { node.classList.add("recede"); return node; };
+  const windowedCards = windowed.map((e) => {
+    const card = e.make();
+    if (!isNow(e)) card.classList.add("recede");
+    return { card, now: isNow(e), sort: e.sort };
+  });
+  // If nothing is literally "now", keep the soonest upcoming bright so it's not all grey.
+  if (!windowedCards.some((w) => w.now) && !house && !tasks && windowedCards.length) {
+    windowedCards.reduce((a, b) => (a.sort <= b.sort ? a : b)).card.classList.remove("recede");
+  }
+
   const panels = [
-    ...allDay.map((e) => e.make()),
-    ...windowed.map((e) => e.make()),
+    ...allDay.map((e) => recede(e.make())),
+    ...windowedCards.map((w) => w.card),
     ...(house ? [house] : []),
     ...(tasks ? [tasks] : []),
-    ...(groceries ? [groceries] : []),
-    ...(soak ? [soak] : []),
+    ...(groceries ? [recede(groceries)] : []),
+    ...(soak ? [recede(soak)] : []),
   ];
 
   // Never go quiet: if nothing is in-window, keep the NEXT upcoming item on screen.
