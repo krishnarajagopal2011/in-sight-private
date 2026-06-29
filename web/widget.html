@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>in sight · widget</title>
+  <style>
+    :root { --bg:#0f1217; --surface:#181c24; --text:#eef2f8; --muted:#8a94a6; --faint:#5b6675; --accent:#ffd166; --good:#6bd0a0; }
+    * { box-sizing: border-box; margin: 0; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg); color: var(--text); height: 100vh;
+      font-family: "Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+      -webkit-font-smoothing: antialiased; overflow: hidden;
+    }
+    a.card {
+      display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit;
+      background: var(--surface); border-radius: 18px; padding: clamp(12px, 4vw, 22px); gap: .35rem;
+    }
+    .top { display: flex; justify-content: space-between; align-items: baseline; }
+    .brand { font-weight: 800; font-size: .8rem; color: var(--muted); letter-spacing: -.01em; }
+    .clock { font-weight: 800; font-variant-numeric: tabular-nums; font-size: 1rem; }
+    .kick { text-transform: uppercase; letter-spacing: .12em; font-size: .62rem; font-weight: 700; color: var(--accent); margin-top: auto; }
+    .now  { font-size: clamp(1.3rem, 8vw, 2.1rem); font-weight: 800; line-height: 1.05; }
+    .sub  { color: var(--muted); font-size: clamp(.8rem, 3.6vw, 1rem); }
+    .next { color: var(--faint); font-size: clamp(.72rem, 3.2vw, .9rem); margin-top: .2rem; }
+    .dot  { display:inline-block; width:.5rem; height:.5rem; border-radius:50%; background:var(--good); margin-left:.35rem; vertical-align:middle; }
+  </style>
+</head>
+<body>
+  <a class="card" id="card" href="/life">
+    <div class="top"><span class="brand">in sight<span class="dot"></span></span><span class="clock" id="clock">--:--</span></div>
+    <div class="kick" id="kick">Right now</div>
+    <div class="now" id="now">…</div>
+    <div class="sub" id="sub"></div>
+    <div class="next" id="next"></div>
+  </a>
+  <script>
+    const token = new URLSearchParams(location.search).get("token") || "";
+    const q = token ? "?token=" + encodeURIComponent(token) : "";
+    document.getElementById("card").href = "/life" + q;
+    const pad = (x) => String(x).padStart(2, "0");
+    const toMin = (t) => { const [h, m] = (t || "0:0").split(":").map(Number); return h * 60 + (m || 0); };
+    const nowMin = () => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); };
+    const rel = (t) => { const d = toMin(t) - nowMin(); return d <= 0 ? "now" : d < 60 ? `in ${d} min` : `in ${Math.round(d / 6) / 10} h`; };
+
+    function tick() { const n = new Date(); document.getElementById("clock").textContent = pad(n.getHours()) + ":" + pad(n.getMinutes()); }
+
+    function render(d) {
+      const n = nowMin();
+      const blocks = (d.schedule && d.schedule.blocks) || [];
+      const cur = blocks.find((b) => b.start && b.end && toMin(b.start) <= n && n < toMin(b.end));
+      const fit = (d.fitness || []).find((s) => toMin(s.start) <= n && n <= toMin(s.end));
+      const meals = (d.food && d.food.meals) || [];
+
+      let kick = "Right now", now = "Free", sub = "";
+      if (fit) { kick = "Fitness · now"; now = fit.name; sub = "until " + fit.end; }
+      else if (cur) {
+        let picks = [...(cur.picks || [])];
+        if (cur.dverse) picks = picks.concat((d.tasks || []).slice(0, cur.dverse).map((t) => t.title));
+        kick = cur.name + (picks.length > 1 ? " · pick one" : "");
+        now = picks[0] || cur.name;
+        sub = picks[1] ? "or  " + picks[1] : "";
+      } else {
+        const dueMeal = meals.find((m) => { const dm = n - toMin(m.time); return dm >= 0 && dm <= 30; });
+        if (dueMeal) {
+          kick = "Eat · now"; now = dueMeal.name; sub = (dueMeal.items || []).slice(0, 2).join("  ·  ");
+        } else {
+          // nothing now → show the next thing as the headline
+          const upcoming = [...meals.map((m) => ({ t: m.time, label: m.name })),
+                            ...blocks.map((b) => ({ t: b.start, label: b.name })),
+                            ...(d.fitness || []).map((s) => ({ t: s.start, label: s.name }))]
+            .filter((x) => toMin(x.t) > n).sort((a, b) => toMin(a.t) - toMin(b.t));
+          if (upcoming[0]) { kick = "Next"; now = upcoming[0].label; sub = rel(upcoming[0].t); }
+        }
+      }
+      const nextMeal = meals.find((m) => toMin(m.time) > n);
+      document.getElementById("kick").textContent = kick;
+      document.getElementById("now").textContent = now;
+      document.getElementById("sub").textContent = sub;
+      document.getElementById("next").textContent = nextMeal ? `next meal: ${nextMeal.name} ${rel(nextMeal.time)}` : "";
+    }
+
+    async function load() {
+      try {
+        const r = await fetch("/api/life" + q, { cache: "no-store" });
+        const j = await r.json();
+        if (j && j.data) render(j.data);
+      } catch (e) { /* keep last */ }
+    }
+    tick(); load();
+    setInterval(tick, 15000);
+    setInterval(load, 60000);
+  </script>
+</body>
+</html>

@@ -46,6 +46,9 @@ db.restore_readings_from_pg()
 app.secret_key = os.environ.get("INSIGHT_SECRET_KEY") or token_hex(32)
 app.permanent_session_lifetime = dt.timedelta(days=30)
 _PASSWORD = os.environ.get("INSIGHT_PASSWORD")
+# Read-only access for the home-screen widget via ?token=... (so it loads without
+# the login screen). Set INSIGHT_WIDGET_TOKEN to enable.
+_WIDGET_TOKEN = os.environ.get("INSIGHT_WIDGET_TOKEN")
 _OPEN_PATHS = {"/login", "/api/health", "/manifest.webmanifest", "/sw.js"}
 
 
@@ -56,6 +59,8 @@ def _gate():
     p = request.path
     if p in _OPEN_PATHS or p.startswith("/static/") or session.get("auth"):
         return None
+    if _WIDGET_TOKEN and request.args.get("token") == _WIDGET_TOKEN:
+        return None                                  # widget token (read-only views/API)
     if p.startswith("/api/"):
         return jsonify({"ok": False, "error": "unauthorized"}), 401
     return redirect("/login")
@@ -287,6 +292,11 @@ def projects_view():
 @app.get("/life")
 def life_view():
     return send_from_directory(WEB_DIR, "life.html")
+
+
+@app.get("/widget")               # compact home-screen widget view (token-gated)
+def widget_view():
+    return send_from_directory(WEB_DIR, "widget.html")
 
 
 @app.get("/log")                  # phone-friendly logging form
