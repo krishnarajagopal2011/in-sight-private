@@ -45,7 +45,7 @@ groceries:
 # Exact prep, at the right time — removes the decision so you stay on-plan. (Evening
 # soak + morning steam-dal/shake live in the soak + house cards; this adds the rest.)
 meal_prep:
-  - {time: "07:45", title: "Pack for the kitchen",
+  - {time: "07:45", title: "Pack for Lunch",
      items: ["Carry protein (MyPro / tofu / edamame) to add at the solar kitchen — lunch & dinner"]}
   - {day: saturday, time: "17:00", title: "Weekly batch prep",
      items: ["Pressure-cook a batch of dal + chole (2–3 days)", "Sprout a big jar of moong / chana", "Portion tofu & tempeh"]}
