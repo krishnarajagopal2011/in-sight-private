@@ -75,15 +75,15 @@ function renderDayMenu(data) {
   const host = document.getElementById("daymenu");
   if (!host) return;
   clear(host);
-  const items = [
-    ...((data.schedule && data.schedule.menu) || []),
-    ...((data.tasks || []).map((t) => t.title)),
-  ];
+  const now = nowMin();
+  // Only things already scheduled earlier today (start <= now) — a catch-up list.
+  // Future items make no sense here; they'll surface as cards when their time comes.
+  const items = (data.day_menu || []).filter((m) => toMin(m.time) <= now);
   if (!items.length) { host.style.display = "none"; return; }
   host.style.display = "";
-  host.appendChild(el("div", "daymenu-title", "Today · pick anything"));
+  host.appendChild(el("div", "daymenu-title", "Earlier today · pick any"));
   const ul = el("ul", "clean daymenu-list");
-  for (const it of items) ul.appendChild(el("li", null, it));
+  for (const m of items) ul.appendChild(el("li", null, m.label));
   host.appendChild(ul);
 }
 

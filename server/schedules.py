@@ -374,6 +374,22 @@ def upcoming_travel(cfg: dict[str, Any], d: dt.date, limit: int = 3) -> list[dic
 
 
 # ── Assemble ─────────────────────────────────────────────────────────────────
+def day_menu(cfg: dict[str, Any], d: dt.date) -> list[dict[str, Any]]:
+    """Today's activities with their start time — block options + fitness. The
+    bottom-right 'pick anything' list filters this to start <= now (catch-up on what
+    was scheduled earlier today; future items would make no sense there)."""
+    out = []
+    for b in (cfg.get("schedule", {}) or {}).get("blocks", []) or []:
+        start = b.get("start", "")
+        for o in b.get("options", []) or []:
+            out.append({"time": start, "label": str(o)})
+    for s in todays_fitness(cfg, d):
+        if s.get("name"):
+            out.append({"time": s.get("start", ""), "label": s["name"]})
+    out.sort(key=lambda x: str(x.get("time", "99:99")))
+    return out
+
+
 def build_life_payload(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
     return {
         "source": "knowledge",
@@ -385,6 +401,7 @@ def build_life_payload(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
         "travel": upcoming_travel(cfg, d),
         "schedule": todays_schedule(cfg, d),
         "groceries": groceries_today(cfg, d),
+        "day_menu": day_menu(cfg, d),
     }
 
 
