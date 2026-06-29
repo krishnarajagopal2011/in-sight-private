@@ -28,17 +28,14 @@ blocks:
   - {name: "Meditation + breathwork", start: "04:45", end: "05:00", kind: routine,
      options: ["Meditation", "Breathwork"]}
 
-  # Daily customer outreach FIRST, in peak morning energy — drafts are pre-made
-  # overnight so it's "review + send", not "face the blank page" (beats RSD).
-  - {name: "Reach out — early customers", start: "05:00", end: "05:20", kind: focus,
-     options: ["Review + send today's drafts (3 early customers)"]}
+  # WORK = pick one. `dverse: N` pulls N real tasks from dVerse central command.
+  # Morning: the standard daily outreach OR one real task. Drafts are pre-made so
+  # outreach is "review + send", not "face the blank page" (beats RSD).
+  - {name: "Work", start: "05:00", end: "06:00", kind: work,
+     options: ["Reach out — send 3 customer drafts"], dverse: 1}
 
-  - {name: "Focus block", start: "05:20", end: "06:00", kind: focus,
-     options: ["Grant writing", "Concept detailing"]}
-
-  # Work block: dVerse tasks, surfaced 2 at a time by priority (pick one). Adjust
-  # the hours to your real work window.
-  - {name: "Work block", start: "09:00", end: "11:30", kind: focus, source: dverse}
+  # Main work block — two real dVerse tasks by priority, pick one.
+  - {name: "Work", start: "09:00", end: "11:30", kind: work, dverse: 2}
 
   # Afternoon = your biggest danger window AND your buffer/partner time. Fill it
   # with connection + movement + light so the rabbit-hole has no room. Options are

@@ -279,7 +279,9 @@ def index():
 
 @app.get("/projects")
 def projects_view():
-    return send_from_directory(WEB_DIR, "projects.html")
+    # One unified, schedule-driven view now — /projects just lands on it. dVerse
+    # work appears only inside the Work block on the Life board, not as its own screen.
+    return redirect("/life")
 
 
 @app.get("/life")

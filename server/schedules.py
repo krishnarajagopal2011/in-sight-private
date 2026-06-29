@@ -335,6 +335,7 @@ def todays_schedule(cfg: dict[str, Any], d: dt.date) -> dict[str, Any]:
             "picks": picks[:2],
             "boundary": b.get("boundary", ""),
             "note": b.get("note", ""),
+            "dverse": int(b.get("dverse", 0) or 0),
         })
     out.sort(key=lambda x: str(x.get("start", "99:99")))
     # The full menu of today's options (every block's choices) — for the "pick

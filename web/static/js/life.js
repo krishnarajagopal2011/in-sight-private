@@ -96,7 +96,7 @@ function collectEvents(data) {
     const live = ongoing(s.start, s.end);
     ev.push({
       start: s.start, end: s.end, live, allDay: false, sort: toMin(s.start),
-      make: (prefix) => panel(prefix ?? (live ? "Movement · now" : `Movement · ${relTime(s.start)}`), (p) => {
+      make: (prefix) => panel(prefix ?? (live ? "Fitness · now" : `Fitness · ${relTime(s.start)}`), (p) => {
         const line = el("div", "panel-title");
         line.appendChild(el("span", "accent", `${s.time_range}  `));
         line.append(s.name);
@@ -287,8 +287,13 @@ function blockPanel(data) {
   const n = nowMin();
   const cur = sched.blocks.find((b) => b.start && b.end && toMin(b.start) <= n && n < toMin(b.end));
   if (cur) {
-    let picks = cur.picks || [];
-    if (cur.source === "dverse") picks = (data.tasks || []).slice(0, 2).map((t) => t.title);
+    // Static options first, then N real dVerse tasks (so Work = "Reach out" OR a
+    // real task). dVerse tasks only ever appear inside a work block, never all day.
+    let picks = [...(cur.picks || [])];
+    if (cur.dverse) {
+      picks.push(...(data.tasks || []).slice(0, cur.dverse).map((t) => t.title));
+    }
+    picks = picks.slice(0, 2);
     const kicker = picks.length > 1 ? `${cur.name} · pick one` : cur.name;
     return panel(kicker, (p) => {
       p.appendChild(checklist(picks, `block|${cur.name}`));
@@ -342,7 +347,7 @@ function render() {
   const groceries = groceriesPanel(latest);
   // The current schedule block (with its 2 options) takes the Tasks slot; outside
   // any block it falls back to the dVerse top priority.
-  const tasks = blockPanel(latest) || tasksPanel(latest);
+  const tasks = blockPanel(latest);   // dVerse work only inside a work block, not all day
 
   // Category cards, skipping any with nothing relevant: Fitness/Food (windowed),
   // House (current block), Tasks (top priority), plus soak/health nudges.
