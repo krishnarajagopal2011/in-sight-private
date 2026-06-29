@@ -139,6 +139,13 @@ def api_projects():
 
 @app.get("/api/life")
 def api_life():
+    # Free-tier cold start wipes the ephemeral snapshot — rebuild it on demand so the
+    # screen isn't empty while waiting for the background sync.
+    if db.get_snapshot("life") is None:
+        try:
+            sync.sync_life(load_config())
+        except Exception:                          # noqa: BLE001 — never fail the request
+            pass
     body, status = _snapshot_body("life")
     if body.get("ok"):
         # Live health block (reads latest phone-logged readings + current phase).
