@@ -105,11 +105,19 @@ header.bar {
 .clock .time { font-size: clamp(1.8rem, 3.4vw, 3rem); font-weight: 800; font-variant-numeric: tabular-nums; }
 .clock .date { color: var(--muted); font-size: 1rem; font-weight: 600; }
 
-/* Constant balance readout (top-right): a count of ₹N notes you can spend. */
+/* Constant balance readout (top-right): a coins-in-a-note icon + count of ₹N notes
+   you can spend. It's a button — tap to spend one note. */
 .bar-right { display: flex; align-items: center; gap: clamp(.7rem, 2vw, 1.4rem); }
-.balance-chip { display: inline-flex; align-items: baseline; gap: .35rem; text-decoration: none;
+.balance-chip { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; font: inherit;
   background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 99px;
-  padding: clamp(.35rem, 1vw, .5rem) clamp(.7rem, 1.6vw, 1rem); white-space: nowrap; }
+  padding: clamp(.35rem, 1vw, .5rem) clamp(.7rem, 1.6vw, 1rem); white-space: nowrap;
+  transition: transform .08s ease, border-color .15s ease; -webkit-tap-highlight-color: transparent; }
+.balance-chip:hover { border-color: var(--accent); }
+.balance-chip:active { transform: scale(.94); }
+.balance-chip.empty { opacity: .55; }
+.balance-chip .bc-ic { width: clamp(1.2rem, 2.2vw, 1.6rem); height: clamp(1.2rem, 2.2vw, 1.6rem); flex: 0 0 auto; }
+.balance-chip .bc-note { fill: none; stroke: var(--accent); stroke-width: 1.6; }
+.balance-chip .bc-coin { fill: var(--accent); }
 .balance-chip .bc-n { font-weight: 800; font-size: clamp(1.2rem, 2.4vw, 1.7rem); color: var(--accent); font-variant-numeric: tabular-nums; }
 .balance-chip .bc-x { font-weight: 700; font-size: clamp(.72rem, 1.3vw, .9rem); color: var(--muted); }
 

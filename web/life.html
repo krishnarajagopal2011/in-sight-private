@@ -19,8 +19,8 @@
     <header class="bar">
       <h1>Right now <span class="sub">· in sight</span><span id="dot" class="status-dot"></span></h1>
       <div class="bar-right">
-        <!-- Constant balance readout as a count of notes (tap to update). -->
-        <a class="balance-chip" id="balance" href="/balance" title="Update balance"></a>
+        <!-- Constant balance readout as a count of notes. Tap = spend one note. -->
+        <button class="balance-chip" id="balance" type="button" style="display:none" title="Tap to spend one note (set it in Settings)"></button>
         <div class="clock">
           <div class="time" id="time">--:--</div>
           <div class="date" id="date">—</div>

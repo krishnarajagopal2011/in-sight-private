@@ -2,7 +2,7 @@
 // Strategy: cache the app shell so it launches instantly and survives a dropped
 // connection (showing the last view); page navigations go to the network so
 // redirects (the login gate, etc.) resolve natively; the JSON API is network-only.
-const CACHE = "insight-v19";
+const CACHE = "insight-v21";
 const SHELL = [
   "/life",
   "/static/css/kiosk.css",

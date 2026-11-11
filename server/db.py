@@ -7,8 +7,10 @@ snapshots; app.py reads them.
 from __future__ import annotations
 
 import json
+import math
 import os
 import sqlite3
+import threading
 import time
 from pathlib import Path
 from typing import Any, Optional
@@ -223,11 +225,8 @@ def set_meta(key: str, value: str, db_path: Path = DB_PATH) -> None:
             (key, value),
         )
         conn.commit()
-    if DATABASE_URL:
-        try:
-            _pg_set_meta(key, value)           # durable mirror (survives free-tier resets)
-        except Exception:                      # noqa: BLE001 — local write already succeeded
-            pass
+    # NOTE: no Postgres mirror here — only the balance explicitly mirrors (below), so
+    # high-frequency sync timestamps don't hammer Neon.
 
 
 def get_meta(key: str, default: Optional[str] = None, db_path: Path = DB_PATH) -> Optional[str]:
@@ -238,10 +237,52 @@ def get_meta(key: str, default: Optional[str] = None, db_path: Path = DB_PATH) -
 
 
 # ── Account balance (shown as a count of notes, Fold-style) ──────────────────
+_BALANCE_LOCK = threading.Lock()               # serialize read-modify-write on taps
+
+
+def _mirror_balance(amount: float, denom: int, updated: str) -> None:
+    """Best-effort durable mirror of the balance to Postgres in ONE round-trip,
+    off the request thread so taps stay instant. No-op without DATABASE_URL."""
+    if not DATABASE_URL:
+        return
+    def _work():
+        try:
+            conn = _pg_connect()
+            try:
+                with conn, conn.cursor() as cur:
+                    for k, v in (("balance_amount", str(amount)),
+                                 ("balance_denom", str(int(denom))),
+                                 ("balance_updated", updated)):
+                        cur.execute(
+                            "INSERT INTO app_meta (key, value, updated_at) VALUES (%s, %s, %s) "
+                            "ON CONFLICT (key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at",
+                            (k, v, time.time()),
+                        )
+            finally:
+                conn.close()
+        except Exception:                      # noqa: BLE001 — durability is best-effort
+            pass
+    threading.Thread(target=_work, name="balance-mirror", daemon=True).start()
+
+
 def set_balance(amount: float, denom: int = 500, db_path: Path = DB_PATH) -> None:
-    set_meta("balance_amount", str(amount), db_path)
+    updated = time.strftime("%Y-%m-%d")
+    set_meta("balance_amount", str(float(amount)), db_path)   # local = authoritative
     set_meta("balance_denom", str(int(denom)), db_path)
-    set_meta("balance_updated", time.strftime("%Y-%m-%d"), db_path)
+    set_meta("balance_updated", updated, db_path)
+    _mirror_balance(amount, denom, updated)
+
+
+def spend_notes(notes: int = 1, db_path: Path = DB_PATH) -> Optional[dict[str, Any]]:
+    """Atomically subtract N notes (floored at 0). The lock serializes concurrent
+    taps so no decrement is lost under multi-threaded waitress."""
+    with _BALANCE_LOCK:
+        b = get_balance(db_path)
+        if not b:
+            return None
+        new_amount = max(0.0, b["amount"] - max(0, int(notes)) * b["denom"])
+        set_balance(new_amount, b["denom"], db_path)
+        return get_balance(db_path)
 
 
 def get_balance(db_path: Path = DB_PATH) -> Optional[dict[str, Any]]:
@@ -251,6 +292,8 @@ def get_balance(db_path: Path = DB_PATH) -> Optional[dict[str, Any]]:
     try:
         amount = float(raw)
     except ValueError:
+        return None
+    if not math.isfinite(amount) or amount < 0:    # defuse any bad stored value
         return None
     try:
         denom = int(float(get_meta("balance_denom", "500", db_path) or 500))

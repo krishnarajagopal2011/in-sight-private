@@ -52,6 +52,25 @@
   <div id="fields"></div>
   <button id="save">Save</button><span id="status"></span>
 
+  <h1 style="margin-top:2.4rem">Spending balance</h1>
+  <div class="sub">What you can spend right now, shown on the screen as a count of notes
+    (e.g. <b>20 × ₹500</b>). Set it on setup day and whenever you top up — then just tap
+    the top-right chip to spend one note as you go.</div>
+  <div class="field">
+    <label>Current balance <span class="status unset" id="balStatus">—</span></label>
+    <input id="balAmount" type="number" inputmode="numeric" placeholder="e.g. 10000" />
+    <div class="hint" style="display:flex;align-items:center;gap:10px;margin-top:12px;">Note size
+      <select id="balDenom" style="background:var(--surface-2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:.45rem .6rem;font:inherit;">
+        <option value="100">₹100</option>
+        <option value="500" selected>₹500</option>
+        <option value="1000">₹1000</option>
+        <option value="2000">₹2000</option>
+      </select>
+    </div>
+    <button id="balSave" style="margin-top:14px;">Save balance</button>
+    <span id="balMsg" style="margin-left:10px;font-weight:700;font-size:.9rem;"></span>
+  </div>
+
   <div class="note">
     🔒 Stored as plain key/value on this machine, protected by file permissions — the same trust model as
     Vercel/Supabase env vars (the runtime can read them automatically). For access over a network, use HTTPS
@@ -95,6 +114,31 @@
     });
 
     load();
+
+    // ── Spending balance ──────────────────────────────────────────────────
+    async function loadBalance() {
+      try {
+        const b = (await (await fetch("/api/balance")).json()).balance;
+        const st = $("#balStatus");
+        if (b) {
+          $("#balAmount").value = Math.round(b.amount);
+          $("#balDenom").value = String(b.denom);
+          st.textContent = `${b.notes} × ₹${b.denom}`; st.className = "status set";
+        } else { st.textContent = "not set"; st.className = "status unset"; }
+      } catch (e) {}
+    }
+    $("#balSave").addEventListener("click", async () => {
+      const amount = parseFloat($("#balAmount").value);
+      if (isNaN(amount)) { $("#balMsg").textContent = "Enter an amount"; return; }
+      const denom = Number($("#balDenom").value);
+      try {
+        const j = await (await fetch("/api/balance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount, denom }) })).json();
+        $("#balMsg").textContent = j.ok ? "✓ Saved" : "⚠ Failed";
+        $("#balMsg").style.color = j.ok ? "var(--good)" : "var(--hot)";
+        if (j.ok) loadBalance();
+      } catch (e) { $("#balMsg").textContent = "⚠ Network error"; }
+    });
+    loadBalance();
   </script>
 </body>
 </html>

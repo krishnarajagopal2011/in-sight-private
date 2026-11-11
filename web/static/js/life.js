@@ -329,15 +329,50 @@ function groceriesPanel(data) {
   });
 }
 
-// Constant top-right balance readout — how many ₹N notes you can spend.
+// Constant top-right balance readout — a coins-in-a-note icon + how many ₹N notes
+// you can spend. Tapping it spends one note. Set the balance in Settings.
+const MONEY_SVG = '<svg class="bc-ic" viewBox="0 0 24 24" aria-hidden="true">'
+  + '<rect x="2" y="6.5" width="20" height="11" rx="2.5" class="bc-note"/>'
+  + '<circle cx="12" cy="12" r="3.2" class="bc-coin"/>'
+  + '<circle cx="5.6" cy="12" r="1" class="bc-coin"/>'
+  + '<circle cx="18.4" cy="12" r="1" class="bc-coin"/></svg>';
+
 function renderBalance() {
   const node = document.getElementById("balance");
   if (!node) return;
   const b = latest && latest.balance;
   if (!b) { node.style.display = "none"; return; }
   node.style.display = "";
-  node.innerHTML = `<span class="bc-n">${b.notes}</span><span class="bc-x">× ₹${b.denom}</span>`;
+  node.classList.toggle("empty", b.notes <= 0);
+  node.innerHTML = `${MONEY_SVG}<span class="bc-n">${b.notes}</span><span class="bc-x">× ₹${b.denom}</span>`;
 }
+
+let spendInFlight = 0;   // while >0, the poll won't clobber the optimistic balance
+
+async function spendOneNote() {
+  if (!latest || !latest.balance || latest.balance.notes <= 0) return;
+  // Optimistic: drop one note immediately, reconcile with the server's reply.
+  const b = latest.balance;
+  b.amount = Math.max(0, b.amount - b.denom);
+  b.notes = Math.floor(b.amount / b.denom);
+  renderBalance();
+  spendInFlight++;
+  try {
+    const r = await fetch("/api/balance/spend", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes: 1 }),
+    });
+    const j = await r.json();
+    // Accept the server value only if it does NOT increase the count — guards against
+    // out-of-order responses (the server is atomic, so the true count only goes down).
+    if (j.ok && j.balance && latest.balance && j.balance.notes <= latest.balance.notes) {
+      latest.balance = j.balance; renderBalance();
+    }
+  } catch (e) { /* keep the optimistic value */ }
+  finally { spendInFlight = Math.max(0, spendInFlight - 1); }
+}
+
+document.getElementById("balance")?.addEventListener("click", spendOneNote);
 
 function render() {
   if (!latest) return;
@@ -402,5 +437,11 @@ function render() {
   panels.forEach((p) => flow.appendChild(p));
 }
 
-poll("/api/life", (data) => { latest = data; render(); }, dot);
+poll("/api/life", (data) => {
+  // Don't let a periodic poll overwrite the balance mid-tap (it could snap the count
+  // back up before the spends settle); keep the optimistic value while taps are in flight.
+  if (spendInFlight > 0 && latest && latest.balance) data.balance = latest.balance;
+  latest = data;
+  render();
+}, dot);
 setInterval(render, 60 * 1000); // re-filter against the clock every minute

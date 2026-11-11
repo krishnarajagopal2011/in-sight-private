@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import copy
 import datetime as dt
+import math
 import os
 import threading
 import time
@@ -169,15 +170,34 @@ def api_balance_get():
 
 @app.post("/api/balance")
 def api_balance_set():
-    """Update the available balance (entered manually — in_sight shows it as ₹500s)."""
+    """Set the available balance (entered manually — in_sight shows it as ₹500s)."""
     body = request.get_json(silent=True) or request.form.to_dict()
     try:
         amount = float(body.get("amount"))
+        denom = int(float(body.get("denom") or 500))
     except (TypeError, ValueError):
-        return jsonify({"ok": False, "error": "amount must be a number"}), 400
-    denom = int(float(body.get("denom") or 500))
+        return jsonify({"ok": False, "error": "amount and note size must be numbers"}), 400
+    if not math.isfinite(amount) or amount < 0:
+        return jsonify({"ok": False, "error": "amount must be a finite, non-negative number"}), 400
+    if denom <= 0:
+        return jsonify({"ok": False, "error": "note size must be positive"}), 400
     db.set_balance(amount, denom)
     return jsonify({"ok": True, "balance": db.get_balance()})
+
+
+@app.post("/api/balance/spend")
+def api_balance_spend():
+    """Spend N notes — tapping the top-right chip knocks one note off. Atomic so
+    rapid taps never lose a decrement (see db.spend_notes)."""
+    body = request.get_json(silent=True) or {}
+    try:
+        notes = max(0, int(body.get("notes", 1) or 1))
+    except (TypeError, ValueError):
+        notes = 1
+    b = db.spend_notes(notes)
+    if b is None:
+        return jsonify({"ok": False, "error": "no balance set"}), 400
+    return jsonify({"ok": True, "balance": b})
 
 
 @app.post("/api/complete")
