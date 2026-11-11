@@ -73,6 +73,11 @@ CREATE TABLE IF NOT EXISTS health_readings (
     notes TEXT,
     created_at DOUBLE PRECISION NOT NULL
 );
+CREATE TABLE IF NOT EXISTS app_meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at DOUBLE PRECISION NOT NULL
+);
 """
 
 
@@ -101,6 +106,45 @@ def _pg_add_reading(date: str, vals: list, created: float) -> None:
             )
     finally:
         conn.close()
+
+
+def _pg_set_meta(key: str, value: str) -> None:
+    conn = _pg_connect()
+    try:
+        with conn, conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO app_meta (key, value, updated_at) VALUES (%s, %s, %s) "
+                "ON CONFLICT (key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at",
+                (key, value, time.time()),
+            )
+    finally:
+        conn.close()
+
+
+def restore_meta_from_pg(db_path: Path = DB_PATH) -> int:
+    """Pull durable key-value state (e.g. account balance) from Postgres into local
+    SQLite at startup, so it survives the free tier's resets. No-op without DATABASE_URL."""
+    if not DATABASE_URL:
+        return 0
+    try:
+        _pg_init()
+        conn = _pg_connect()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT key, value FROM app_meta")
+                rows = cur.fetchall()
+        finally:
+            conn.close()
+        init(db_path)
+        with _connect(db_path) as sconn:
+            for k, v in rows:
+                sconn.execute(
+                    "INSERT INTO meta (key, value) VALUES (?, ?) "
+                    "ON CONFLICT(key) DO UPDATE SET value=excluded.value", (k, v))
+            sconn.commit()
+        return len(rows)
+    except Exception:  # noqa: BLE001
+        return 0
 
 
 def restore_readings_from_pg(db_path: Path = DB_PATH) -> int:
@@ -179,6 +223,11 @@ def set_meta(key: str, value: str, db_path: Path = DB_PATH) -> None:
             (key, value),
         )
         conn.commit()
+    if DATABASE_URL:
+        try:
+            _pg_set_meta(key, value)           # durable mirror (survives free-tier resets)
+        except Exception:                      # noqa: BLE001 — local write already succeeded
+            pass
 
 
 def get_meta(key: str, default: Optional[str] = None, db_path: Path = DB_PATH) -> Optional[str]:
@@ -186,6 +235,34 @@ def get_meta(key: str, default: Optional[str] = None, db_path: Path = DB_PATH) -
     with _connect(db_path) as conn:
         row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
     return row["value"] if row else default
+
+
+# ── Account balance (shown as a count of notes, Fold-style) ──────────────────
+def set_balance(amount: float, denom: int = 500, db_path: Path = DB_PATH) -> None:
+    set_meta("balance_amount", str(amount), db_path)
+    set_meta("balance_denom", str(int(denom)), db_path)
+    set_meta("balance_updated", time.strftime("%Y-%m-%d"), db_path)
+
+
+def get_balance(db_path: Path = DB_PATH) -> Optional[dict[str, Any]]:
+    raw = get_meta("balance_amount", None, db_path)
+    if raw in (None, ""):
+        return None
+    try:
+        amount = float(raw)
+    except ValueError:
+        return None
+    try:
+        denom = int(float(get_meta("balance_denom", "500", db_path) or 500))
+    except ValueError:
+        denom = 500
+    denom = denom or 500
+    return {
+        "amount": amount,
+        "denom": denom,
+        "notes": int(amount // denom),         # how many ₹500s you can spend
+        "updated": get_meta("balance_updated", "", db_path),
+    }
 
 
 # ── Completions (tap-to-done on the kiosk) ───────────────────────────────────

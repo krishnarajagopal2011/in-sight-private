@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>in sight · balance</title>
+  <link rel="stylesheet" href="/static/css/kiosk.css" />
+  <style>
+    .wrap { min-height: 100vh; display: grid; place-items: center; padding: var(--pad); }
+    .card { width: min(420px, 100%); background: var(--surface); border: 1px solid var(--line);
+            border-radius: var(--radius); padding: clamp(22px, 5vw, 36px); }
+    .card h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: .2rem; }
+    .card p  { color: var(--muted); font-size: .9rem; margin-bottom: 1.2rem; }
+    .big { font-size: clamp(2rem, 11vw, 3rem); font-weight: 800; line-height: 1; }
+    .big .x { color: var(--accent); }
+    .amt { color: var(--muted); font-size: 1rem; margin: .3rem 0 1.4rem; }
+    label { display:block; color: var(--faint); font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; margin:1rem 0 .4rem; }
+    input { width: 100%; padding: .9rem 1rem; font-size: 1.3rem; font-weight: 700; color: var(--text);
+            background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; outline: none; }
+    input:focus { border-color: var(--accent); }
+    .row { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .row button { flex: 1; min-width: 72px; padding: .7rem; font-weight: 800; font-size: .95rem; cursor: pointer;
+                  background: var(--surface-2); color: var(--text); border: 1px solid var(--line); border-radius: 12px; }
+    .row button.on { border-color: var(--accent); color: var(--accent); background: rgba(255,209,102,.08); }
+    .save { width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: 800; color: #1a1407;
+            background: var(--accent); border: 0; border-radius: 12px; cursor: pointer; margin-top: 1.1rem; }
+    .updated { color: var(--faint); font-size: .78rem; margin-top: 1rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <form class="card" id="form">
+      <h1>Account balance</h1>
+      <p>You can spend…</p>
+      <div class="big" id="notes">— <span class="x">× ₹500</span></div>
+      <div class="amt" id="amt"></div>
+
+      <label>Note size</label>
+      <div class="row" id="denoms">
+        <button type="button" data-denom="100">₹100</button>
+        <button type="button" data-denom="500">₹500</button>
+        <button type="button" data-denom="1000">₹1000</button>
+        <button type="button" data-denom="2000">₹2000</button>
+      </div>
+
+      <label for="amount">Set balance (₹)</label>
+      <input id="amount" type="number" inputmode="numeric" step="1" placeholder="e.g. 10000" autofocus />
+
+      <label>Quick spend</label>
+      <div class="row">
+        <button type="button" id="spend1">− 1 note</button>
+        <button type="button" id="spend2">− 2 notes</button>
+      </div>
+
+      <button class="save" type="submit">Save</button>
+      <div class="updated" id="updated"></div>
+    </form>
+  </div>
+  <script>
+    const fmt = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
+    let cur = null, denom = 500;
+
+    function paintNotes() {
+      const amt = parseFloat(document.getElementById("amount").value);
+      const notes = isNaN(amt) ? "—" : Math.floor(amt / denom);
+      document.getElementById("notes").innerHTML = `${notes} <span class="x">× ₹${denom}</span>`;
+      document.getElementById("amt").textContent = isNaN(amt) ? "not set yet" : `${fmt(amt)} available`;
+      document.getElementById("spend1").textContent = `− 1 × ₹${denom}`;
+      document.getElementById("spend2").textContent = `− 2 × ₹${denom}`;
+    }
+    function setDenom(d) {
+      denom = d;
+      document.querySelectorAll("#denoms button").forEach((b) => b.classList.toggle("on", Number(b.dataset.denom) === d));
+      paintNotes();
+    }
+    function paint(b) {
+      cur = b;
+      if (b) { document.getElementById("amount").value = Math.round(b.amount); setDenom(b.denom || 500); }
+      else setDenom(500);
+      document.getElementById("updated").textContent = b && b.updated ? "updated " + b.updated : "";
+      paintNotes();
+    }
+    async function load() {
+      try { const r = await fetch("/api/balance", { cache: "no-store" }); paint((await r.json()).balance); }
+      catch (e) { setDenom(500); }
+    }
+    async function save(amount) {
+      document.getElementById("amount").value = Math.round(amount);
+      const r = await fetch("/api/balance", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, denom }),
+      });
+      const j = await r.json();
+      if (j.ok) { paint(j.balance); }
+    }
+
+    document.getElementById("amount").addEventListener("input", paintNotes);
+    document.querySelectorAll("#denoms button").forEach((b) => b.addEventListener("click", () => { setDenom(Number(b.dataset.denom)); }));
+    document.getElementById("spend1").addEventListener("click", () => save(Math.max(0, (parseFloat(document.getElementById("amount").value) || 0) - denom)));
+    document.getElementById("spend2").addEventListener("click", () => save(Math.max(0, (parseFloat(document.getElementById("amount").value) || 0) - 2 * denom)));
+    document.getElementById("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const v = parseFloat(document.getElementById("amount").value);
+      if (!isNaN(v)) save(v);
+    });
+    load();
+  </script>
+</body>
+</html>

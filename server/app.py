@@ -40,6 +40,7 @@ db.init()
 # If a durable Postgres (DATABASE_URL) is configured, restore /log history into the
 # fresh ephemeral SQLite so health readings survive free-tier resets. No-op otherwise.
 db.restore_readings_from_pg()
+db.restore_meta_from_pg()                        # durable key-values (e.g. account balance)
 
 # Optional password gate — ON only when INSIGHT_PASSWORD is set (so a public URL
 # isn't wide open). The local kiosk leaves it unset and stays frictionless.
@@ -59,8 +60,8 @@ def _gate():
     p = request.path
     if p in _OPEN_PATHS or p.startswith("/static/") or session.get("auth"):
         return None
-    if _WIDGET_TOKEN and request.args.get("token") == _WIDGET_TOKEN:
-        return None                                  # widget token (read-only views/API)
+    if _WIDGET_TOKEN and request.method == "GET" and request.args.get("token") == _WIDGET_TOKEN:
+        return None                                  # widget token = read-only (GET) access
     if p.startswith("/api/"):
         return jsonify({"ok": False, "error": "unauthorized"}), 401
     return redirect("/login")
@@ -156,7 +157,27 @@ def api_life():
         body["data"]["tasks"] = (proj["payload"].get("immediate") if proj else []) or []
         # Today's tap-to-done state, so checked items stay checked across refreshes.
         body["data"]["completions"] = db.get_completions(dt.date.today())
+        # Account balance shown as a count of ₹500 notes (Fold-style).
+        body["data"]["balance"] = db.get_balance()
     return jsonify(body), status
+
+
+@app.get("/api/balance")
+def api_balance_get():
+    return jsonify({"ok": True, "balance": db.get_balance()})
+
+
+@app.post("/api/balance")
+def api_balance_set():
+    """Update the available balance (entered manually — in_sight shows it as ₹500s)."""
+    body = request.get_json(silent=True) or request.form.to_dict()
+    try:
+        amount = float(body.get("amount"))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "error": "amount must be a number"}), 400
+    denom = int(float(body.get("denom") or 500))
+    db.set_balance(amount, denom)
+    return jsonify({"ok": True, "balance": db.get_balance()})
 
 
 @app.post("/api/complete")
@@ -304,6 +325,11 @@ def life_view():
 @app.get("/widget")               # compact home-screen widget view (token-gated)
 def widget_view():
     return send_from_directory(WEB_DIR, "widget.html")
+
+
+@app.get("/balance")              # quick form to update the available balance
+def balance_view():
+    return send_from_directory(WEB_DIR, "balance.html")
 
 
 @app.get("/log")                  # phone-friendly logging form

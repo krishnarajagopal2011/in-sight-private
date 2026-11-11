@@ -18,9 +18,13 @@
   <div id="app">
     <header class="bar">
       <h1>Right now <span class="sub">· in sight</span><span id="dot" class="status-dot"></span></h1>
-      <div class="clock">
-        <div class="time" id="time">--:--</div>
-        <div class="date" id="date">—</div>
+      <div class="bar-right">
+        <!-- Constant balance readout as a count of notes (tap to update). -->
+        <a class="balance-chip" id="balance" href="/balance" title="Update balance"></a>
+        <div class="clock">
+          <div class="time" id="time">--:--</div>
+          <div class="date" id="date">—</div>
+        </div>
       </div>
     </header>
 

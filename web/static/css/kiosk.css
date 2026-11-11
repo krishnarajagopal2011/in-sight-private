@@ -105,6 +105,14 @@ header.bar {
 .clock .time { font-size: clamp(1.8rem, 3.4vw, 3rem); font-weight: 800; font-variant-numeric: tabular-nums; }
 .clock .date { color: var(--muted); font-size: 1rem; font-weight: 600; }
 
+/* Constant balance readout (top-right): a count of ₹N notes you can spend. */
+.bar-right { display: flex; align-items: center; gap: clamp(.7rem, 2vw, 1.4rem); }
+.balance-chip { display: inline-flex; align-items: baseline; gap: .35rem; text-decoration: none;
+  background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 99px;
+  padding: clamp(.35rem, 1vw, .5rem) clamp(.7rem, 1.6vw, 1rem); white-space: nowrap; }
+.balance-chip .bc-n { font-weight: 800; font-size: clamp(1.2rem, 2.4vw, 1.7rem); color: var(--accent); font-variant-numeric: tabular-nums; }
+.balance-chip .bc-x { font-weight: 700; font-size: clamp(.72rem, 1.3vw, .9rem); color: var(--muted); }
+
 /* freshness dot: green = live, amber pulse = stale/offline */
 .status-dot {
   display: inline-block; width: .7rem; height: .7rem; border-radius: 50%;

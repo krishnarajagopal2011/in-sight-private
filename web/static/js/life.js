@@ -329,10 +329,21 @@ function groceriesPanel(data) {
   });
 }
 
+// Constant top-right balance readout — how many ₹N notes you can spend.
+function renderBalance() {
+  const node = document.getElementById("balance");
+  if (!node) return;
+  const b = latest && latest.balance;
+  if (!b) { node.style.display = "none"; return; }
+  node.style.display = "";
+  node.innerHTML = `<span class="bc-n">${b.notes}</span><span class="bc-x">× ₹${b.denom}</span>`;
+}
+
 function render() {
   if (!latest) return;
   DONE = new Set(latest.completions || []);   // checked items stay checked
   renderHealthStrip();
+  renderBalance();
   renderDayMenu(latest);
   const flow = document.getElementById("flow");
   clear(flow);

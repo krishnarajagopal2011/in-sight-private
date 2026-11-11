@@ -24,12 +24,14 @@
     .now  { font-size: clamp(1.3rem, 8vw, 2.1rem); font-weight: 800; line-height: 1.05; }
     .sub  { color: var(--muted); font-size: clamp(.8rem, 3.6vw, 1rem); }
     .next { color: var(--faint); font-size: clamp(.72rem, 3.2vw, .9rem); margin-top: .2rem; }
+    .bal  { color: var(--accent); font-weight: 800; font-size: clamp(.85rem, 3.8vw, 1.05rem); font-variant-numeric: tabular-nums; }
     .dot  { display:inline-block; width:.5rem; height:.5rem; border-radius:50%; background:var(--good); margin-left:.35rem; vertical-align:middle; }
   </style>
 </head>
 <body>
   <a class="card" id="card" href="/life">
     <div class="top"><span class="brand">in sight<span class="dot"></span></span><span class="clock" id="clock">--:--</span></div>
+    <div class="bal" id="bal"></div>
     <div class="kick" id="kick">Right now</div>
     <div class="now" id="now">…</div>
     <div class="sub" id="sub"></div>
@@ -79,6 +81,8 @@
       document.getElementById("now").textContent = now;
       document.getElementById("sub").textContent = sub;
       document.getElementById("next").textContent = nextMeal ? `next meal: ${nextMeal.name} ${rel(nextMeal.time)}` : "";
+      const b = d.balance;
+      document.getElementById("bal").textContent = b ? `${b.notes} × ₹${b.denom} to spend` : "";
     }
 
     async function load() {
