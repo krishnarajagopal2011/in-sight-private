@@ -121,6 +121,16 @@ header.bar {
 .balance-chip .bc-n { font-weight: 800; font-size: clamp(1.2rem, 2.4vw, 1.7rem); color: var(--accent); font-variant-numeric: tabular-nums; }
 .balance-chip .bc-x { font-weight: 700; font-size: clamp(.72rem, 1.3vw, .9rem); color: var(--muted); }
 
+/* Settings gear (far top-right) — subtle until hovered; a small turn on hover. */
+.gear { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: clamp(2.1rem, 3.2vw, 2.6rem); height: clamp(2.1rem, 3.2vw, 2.6rem);
+  color: var(--muted); text-decoration: none; border-radius: 50%;
+  transition: color .15s ease, background .15s ease, transform .3s ease;
+  -webkit-tap-highlight-color: transparent; }
+.gear svg { width: 62%; height: 62%; }
+.gear:hover { color: var(--accent); background: var(--surface); transform: rotate(35deg); }
+.gear:active { transform: rotate(35deg) scale(.9); }
+
 /* freshness dot: green = live, amber pulse = stale/offline */
 .status-dot {
   display: inline-block; width: .7rem; height: .7rem; border-radius: 50%;

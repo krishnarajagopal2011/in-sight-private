@@ -2,9 +2,9 @@
 // Strategy: cache the app shell so it launches instantly and survives a dropped
 // connection (showing the last view); page navigations go to the network so
 // redirects (the login gate, etc.) resolve natively; the JSON API is network-only.
-const CACHE = "insight-v21";
+const CACHE = "insight-v22";
 const SHELL = [
-  "/life",
+  "/", "/life",
   "/static/css/kiosk.css",
   "/static/js/common.js", "/static/js/life.js",
   "/static/icon.svg", "/static/icon-192.png", "/static/icon-512.png",
@@ -34,7 +34,7 @@ self.addEventListener("fetch", (e) => {
   // resolve natively. Never return a redirected response here — that breaks the
   // navigation with ERR_FAILED. Fall back to the cached shell only when offline.
   if (e.request.mode === "navigate") {
-    e.respondWith(fetch(e.request).catch(() => caches.match("/life")));
+    e.respondWith(fetch(e.request).catch(() => caches.match("/") || caches.match("/life")));
     return;
   }
 

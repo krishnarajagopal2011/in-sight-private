@@ -2,7 +2,7 @@
   "name": "in sight",
   "short_name": "in sight",
   "description": "Your projects, tasks, meals and day — always in sight.",
-  "start_url": "/life",
+  "start_url": "/",
   "scope": "/",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
@@ -16,7 +16,7 @@
     { "src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml" }
   ],
   "shortcuts": [
-    { "name": "Right now", "short_name": "Life", "url": "/life" },
-    { "name": "Projects",  "short_name": "Projects", "url": "/projects" }
+    { "name": "Right now", "short_name": "Life", "url": "/" },
+    { "name": "Settings",  "short_name": "Settings", "url": "/settings" }
   ]
 }
